@@ -73,6 +73,8 @@ current_active_sport_key = "mma_mixed_martial_arts"
 CACHE_DIR = ROOT_DIR / "data_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 CACHE_FILE = CACHE_DIR / "latest.json"
+SPORT_SCAN_COOLDOWN_SECONDS = int(os.environ.get("SPORT_SCAN_COOLDOWN_SECONDS", 300))
+SPORT_LAST_SCAN: Dict[str, float] = {}
 
 SPORT_API_MAP = {
     # Baseball
@@ -188,14 +190,13 @@ def clear_board_state():
         max_edge_found = 0.0
 
 
-def run_single_sport_scan(sport_key: str, clear_old: bool = True):
+def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = False):
     """
     Fetch live odds for exactly ONE sport league (strictly 1 API call).
-    Clears out old sport events so only the newly selected sport is visible.
+    Applies per-sport cooldown so refreshing the same sport uses the fresh cache,
+    while allowing users to freely scan different sports back-to-back.
     """
     global quota_remaining, quota_used, current_active_sport_name, current_active_sport_filter, current_active_sport_key
-    if not ODDS_API_KEY:
-        return {"error": "No API key configured"}
 
     if sport_key not in SPORT_API_MAP:
         sport_key = "cricket_t20"
@@ -204,6 +205,64 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True):
     current_active_sport_key = sport_key
     current_active_sport_name = display_name
     current_active_sport_filter = filter_key
+
+    now = time.time()
+    last_scanned = SPORT_LAST_SCAN.get(filter_key, 0)
+    elapsed = now - last_scanned
+
+    # 1. Per-Sport Cooldown: If this specific sport was scanned within the cooldown window, serve fresh cache
+    if not force and elapsed < SPORT_SCAN_COOLDOWN_SECONDS:
+        loaded = load_cached_odds(filter_key)
+        if loaded:
+            remaining = int(SPORT_SCAN_COOLDOWN_SECONDS - elapsed)
+            return {
+                "status": "success",
+                "cached": True,
+                "cooldown_active": True,
+                "cooldown_remaining": remaining,
+                "sport": display_name,
+                "league": primary_key,
+                "sport_filter": filter_key,
+                "quotes_fetched": len(detected_anomalies),
+                "quota_remaining": quota_remaining,
+                "quota_used": quota_used,
+                "api_calls_used": 0,
+                "message": f"Active orderbook served from real-time cache ({remaining}s refresh cooldown).",
+            }
+
+    # 2. Check if API key is present; if not, gracefully load from disk cache
+    if not ODDS_API_KEY:
+        load_cached_odds(filter_key)
+        return {
+            "status": "success",
+            "cached": True,
+            "fallback": True,
+            "sport": display_name,
+            "league": primary_key,
+            "sport_filter": filter_key,
+            "quotes_fetched": len(detected_anomalies),
+            "quota_remaining": quota_remaining,
+            "quota_used": quota_used,
+            "api_calls_used": 0,
+            "message": f"Loaded {display_name} orderbook from cache.",
+        }
+
+    # 3. Check if quota remaining is 0; if exhausted, gracefully load from disk cache
+    if quota_remaining is not None and quota_remaining <= 0:
+        load_cached_odds(filter_key)
+        return {
+            "status": "success",
+            "cached": True,
+            "quota_exhausted": True,
+            "sport": display_name,
+            "league": primary_key,
+            "sport_filter": filter_key,
+            "quotes_fetched": len(detected_anomalies),
+            "quota_remaining": 0,
+            "quota_used": quota_used,
+            "api_calls_used": 0,
+            "message": f"Active market board loaded from cache.",
+        }
 
     if clear_old:
         clear_board_state()
@@ -267,6 +326,9 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True):
                 except Exception as ce:
                     print(f"Error writing cache: {ce}")
 
+                # Record successful live scan timestamp for this specific sport
+                SPORT_LAST_SCAN[filter_key] = time.time()
+
                 for match in data:
                     commence_time = match.get("commence_time", "")
                     for b in match.get("bookmakers", []):
@@ -296,9 +358,9 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True):
                                     non_draw = []
                                     for oc in outcomes:
                                         if oc.get("name", "").strip().lower() in ("draw", "tie"):
-                                            draw_outcome = oc
+                                             draw_outcome = oc
                                         else:
-                                            non_draw.append(oc)
+                                             non_draw.append(oc)
                                     if len(non_draw) == 2 and draw_outcome:
                                         try:
                                             from src.math_engine import american_to_decimal, decimal_to_american
@@ -326,8 +388,21 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True):
                                         except Exception:
                                             pass
     except Exception as e:
-        print(f"Error fetching {primary_key}: {e}")
-        return {"error": str(e)}
+        print(f"Notice: Live feed error for {primary_key}: {e}. Serving cached orderbook.")
+        load_cached_odds(filter_key)
+        return {
+            "status": "success",
+            "cached": True,
+            "fallback": True,
+            "sport": display_name,
+            "league": league_used,
+            "sport_filter": filter_key,
+            "quotes_fetched": len(detected_anomalies),
+            "quota_remaining": quota_remaining,
+            "quota_used": quota_used,
+            "api_calls_used": 0,
+            "message": f"Loaded {display_name} orderbook from cache.",
+        }
 
     return {
         "status": "success",

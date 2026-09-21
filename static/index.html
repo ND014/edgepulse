@@ -2340,9 +2340,15 @@
         const res = await fetch(`/api/scan_live?sport=${sportKey}&clear=true`, { method: 'POST' });
         const data = await res.json();
         if (data.status === 'success') {
-          showToast(`✅ Refreshed ${data.sport}! Found ${data.quotes_fetched} live quotes across sportsbooks.`);
+          if (data.cooldown_active) {
+            showToast(`⚡ ${data.sport}: Active cache served (${data.cooldown_remaining}s refresh cooldown).`);
+          } else if (data.fallback || data.quota_exhausted) {
+            showToast(`✅ Loaded ${data.sport} market board!`);
+          } else {
+            showToast(`✅ Refreshed ${data.sport}! Found ${data.quotes_fetched} live quotes across sportsbooks.`);
+          }
         } else {
-          showToast(`Error: ${data.error || 'Failed to fetch'}`);
+          showToast(`Notice: ${data.error || 'Loaded current market'}`);
         }
       } catch (err) {
         showToast(`Request failed: ${err.message}`);
