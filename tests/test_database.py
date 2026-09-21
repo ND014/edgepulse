@@ -222,7 +222,19 @@ class TestDatabaseAuth(unittest.TestCase):
         self.assertEqual(stats2["total_profit"], 100.0)
         self.assertEqual(stats2["win_rate"], 100.0)
 
+    def test_activity_logs(self):
+        uid = 999
+        log_id = db.log_activity("soccer_epl", "Soccer (EPL)", "view_sport", user_id=uid, user_email="fan@epl.com", user_name="Soccer Fan")
+        self.assertGreater(log_id, 0)
+        logs = db.get_activity_logs(limit=10, user_id=uid)
+        self.assertGreaterEqual(len(logs), 1)
+        self.assertEqual(logs[0]["sport_key"], "soccer_epl")
+        self.assertEqual(logs[0]["sport_name"], "Soccer (EPL)")
+        self.assertEqual(logs[0]["user_email"], "fan@epl.com")
+        self.assertIn("UTC", logs[0]["formatted_time"])
+
 
 if __name__ == '__main__':
     unittest.main()
+
 

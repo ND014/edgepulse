@@ -116,6 +116,23 @@ def init_db():
             conn.execute("CREATE INDEX IF NOT EXISTS idx_bets_user_id ON bets(user_id);")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_bets_status ON bets(status);")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_bets_placed_at ON bets(placed_at);")
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS activity_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    user_email TEXT,
+                    user_name TEXT,
+                    sport_key TEXT NOT NULL,
+                    sport_name TEXT NOT NULL,
+                    action TEXT NOT NULL DEFAULT 'view_sport',
+                    ip_address TEXT,
+                    timestamp REAL NOT NULL
+                );
+            """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_activity_logs_timestamp ON activity_logs(timestamp);")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_activity_logs_sport_key ON activity_logs(sport_key);")
     finally:
         conn.close()
 
@@ -779,6 +796,84 @@ def clear_all_users() -> int:
             conn.execute("DELETE FROM sessions;")
             cursor = conn.execute("DELETE FROM users;")
             return cursor.rowcount
+    finally:
+        conn.close()
+
+
+def log_activity(
+    sport_key: str,
+    sport_name: str,
+    action: str = "view_sport",
+    user_id: Optional[int] = None,
+    user_email: Optional[str] = None,
+    user_name: Optional[str] = None,
+    ip_address: Optional[str] = None,
+) -> int:
+    """Record user or guest sport viewing/action activity timelog in SQLite."""
+    conn = get_connection()
+    try:
+        with conn:
+            cur = conn.execute(
+                """
+                INSERT INTO activity_logs (user_id, user_email, user_name, sport_key, sport_name, action, ip_address, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                """,
+                (
+                    user_id,
+                    user_email or "Guest (Visitor)",
+                    user_name or "Guest Visitor",
+                    sport_key,
+                    sport_name,
+                    action,
+                    ip_address or "127.0.0.1",
+                    time.time(),
+                ),
+            )
+            return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def get_activity_logs(
+    limit: int = 100,
+    user_id: Optional[int] = None,
+    sport_key: Optional[str] = None,
+) -> list[Dict[str, Any]]:
+    """Retrieve recent activity timelogs ordered newest first."""
+    conn = get_connection()
+    try:
+        query = "SELECT * FROM activity_logs"
+        params: list[Any] = []
+        clauses = []
+        if user_id is not None:
+            clauses.append("user_id = ?")
+            params.append(user_id)
+        if sport_key is not None:
+            clauses.append("sport_key = ?")
+            params.append(sport_key)
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
+        query += " ORDER BY timestamp DESC LIMIT ?;"
+        params.append(limit)
+        rows = conn.execute(query, params).fetchall()
+        result = []
+        for r in rows:
+            ts = r["timestamp"]
+            time_struct = time.gmtime(ts)
+            iso_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time_struct)
+            result.append({
+                "id": r["id"],
+                "user_id": r["user_id"],
+                "user_email": r["user_email"],
+                "user_name": r["user_name"],
+                "sport_key": r["sport_key"],
+                "sport_name": r["sport_name"],
+                "action": r["action"],
+                "ip_address": r["ip_address"],
+                "timestamp": ts,
+                "formatted_time": iso_str,
+            })
+        return result
     finally:
         conn.close()
 

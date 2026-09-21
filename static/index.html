@@ -99,6 +99,14 @@
           <span id="tracker-pending-badge" class="hidden px-1.5 py-0.2 rounded-full text-[9px] bg-neonGreen/20 text-neonGreen font-bold border border-neonGreen/40">0</span>
         </button>
 
+        <!-- Activity Timelogs Nav Button -->
+        <button id="nav-btn-logs" onclick="openActivityLogsModal()" class="flex items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonYellow px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer" title="View SQLite User Activity & Timelogs">
+          <svg class="w-3.5 h-3.5 text-neonYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-white hidden sm:inline">Timelogs</span>
+        </button>
+
         <!-- Back to Sports Hub Button (visible when on Dashboard) -->
         <button id="nav-btn-hub" onclick="showSportsHomeView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonCyan px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition shadow-sm cursor-pointer" title="Choose another sport or league">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1374,6 +1382,74 @@
       </div>
     </div>
   </div>
+
+  <!-- Real-Time Activity Timelogs Modal -->
+  <div id="activity-logs-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 font-mono">
+    <div id="activity-logs-backdrop" onclick="closeActivityLogsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"></div>
+    <div class="relative w-full max-w-3xl bg-brandDark border border-brandBorder/90 rounded-3xl p-5 sm:p-6 shadow-2xl z-10 flex flex-col max-h-[88vh] overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-brandBorder/80 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-neonYellow/10 border border-neonYellow/30 flex items-center justify-center text-neonYellow shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="text-base font-bold text-white font-mono">ACTIVITY TIMELOGS</h3>
+              <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-bold">
+                <span class="w-1.5 h-1.5 rounded-full bg-neonGreen animate-pulse"></span>
+                <span>SQLITE AUDIT</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Live database timelogs: who viewed what sport, and when</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="fetchActivityLogs()" class="px-3 py-1.5 rounded-xl bg-brandCard hover:bg-slate-800 border border-brandBorder text-slate-300 hover:text-white transition active:scale-95 text-xs font-mono flex items-center space-x-1.5 cursor-pointer" title="Refresh logs">
+            <svg class="w-3.5 h-3.5 text-neonYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+          <button onclick="closeActivityLogsModal()" class="w-8 h-8 rounded-xl bg-brandCard hover:bg-slate-800 border border-brandBorder text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer" title="Close">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs & Summary -->
+      <div class="py-3 flex items-center justify-between gap-2 border-b border-brandBorder/40 shrink-0 text-xs">
+        <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
+          <button onclick="filterActivityLogs('all')" id="btn-filter-log-all" class="px-2.5 py-1 rounded-lg bg-neonCyan text-black font-bold transition cursor-pointer">All Events</button>
+          <button onclick="filterActivityLogs('view_sport')" id="btn-filter-log-views" class="px-2.5 py-1 rounded-lg bg-brandCard text-slate-400 hover:text-white transition cursor-pointer">Sport Views</button>
+          <button onclick="filterActivityLogs('scan_live')" id="btn-filter-log-scans" class="px-2.5 py-1 rounded-lg bg-brandCard text-slate-400 hover:text-white transition cursor-pointer">Live Scans</button>
+          <button onclick="filterActivityLogs('login')" id="btn-filter-log-logins" class="px-2.5 py-1 rounded-lg bg-brandCard text-slate-400 hover:text-white transition cursor-pointer">Logins</button>
+        </div>
+        <div id="activity-logs-count-badge" class="text-[11px] text-slate-400 shrink-0 font-mono">0 events logged</div>
+      </div>
+
+      <!-- Logs Container (Scrollable) -->
+      <div id="activity-logs-list" class="flex-1 overflow-y-auto divide-y divide-brandBorder/40 py-2 min-h-[260px] max-h-[55vh]">
+        <div class="text-center py-12 text-slate-500 text-xs">Loading activity timelogs from database...</div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-brandBorder/80 flex items-center justify-between shrink-0 text-[11px] text-slate-500">
+        <div class="flex items-center space-x-1.5 truncate pr-2">
+          <svg class="w-3.5 h-3.5 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="truncate">Stored permanently in SQLite table <code class="text-slate-300">activity_logs</code></span>
+        </div>
+        <a href="/api/activity_logs" target="_blank" class="text-neonCyan hover:underline shrink-0">Raw JSON ↗</a>
+      </div>
+    </div>
+  </div>
+
   <!-- User Profile Slide-Out Side Menu Drawer -->
   <div id="profile-drawer-backdrop" onclick="closeProfileDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
@@ -1798,33 +1874,37 @@
       }
     }
 
+    function getAuthHeaders(headers = {}) {
+      const h = { ...headers };
+      const token = localStorage.getItem('edgepulse_token');
+      if (token) {
+        h['Authorization'] = `Bearer ${token}`;
+      }
+      return h;
+    }
+
     async function checkAuth() {
       const rememberMe = localStorage.getItem('edgepulse_remember_me') === '1';
       const sessionActive = sessionStorage.getItem('edgepulse_session_active') === '1';
+      const token = localStorage.getItem('edgepulse_token');
 
       // If user did not choose to save login details on this browser,
       // and this is a fresh launch (new tab/window where sessionStorage is empty),
       // they must sign in again!
-      if (!rememberMe && !sessionActive) {
+      if (!rememberMe && !sessionActive && !token) {
         try {
-          await fetch('/api/auth/logout', { method: 'POST' });
+          await fetch('/api/auth/logout', { method: 'POST', headers: getAuthHeaders() });
         } catch (e) {}
         currentUser = null;
+        localStorage.removeItem('edgepulse_token');
         showLandingView();
         return;
       }
 
       try {
-        const res = await fetch('/api/auth/me');
+        const res = await fetch('/api/auth/me', { headers: getAuthHeaders() });
         const data = await res.json();
         if (data.status === 'authenticated' && data.user) {
-          // Double verify against server session settings
-          if (!data.user.session_remember_me && !sessionActive) {
-            await fetch('/api/auth/logout', { method: 'POST' });
-            currentUser = null;
-            showLandingView();
-            return;
-          }
           sessionStorage.setItem('edgepulse_session_active', '1');
           currentUser = data.user;
           if (window.location.hash === '#tracker') {
@@ -1836,6 +1916,7 @@
           }
         } else {
           currentUser = null;
+          localStorage.removeItem('edgepulse_token');
           showLandingView();
         }
       } catch (e) {
@@ -2017,7 +2098,7 @@
       showToast(`Loading ${displayName}...`);
       await setFilter(filterKey || 'all', false);
       try {
-        const res = await fetch(`/api/load_cached?sport=${filterKey}`, { method: 'POST' });
+        const res = await fetch(`/api/load_cached?sport=${filterKey}`, { method: 'POST', headers: getAuthHeaders() });
         const data = await res.json();
         if (data.status === 'success' && data.loaded) {
           showToast(`✅ Loaded ${displayName} markets!`);
@@ -2087,6 +2168,9 @@
         const data = await res.json();
         if (data.status === 'success') {
           currentUser = data.user;
+          if (data.token) {
+            localStorage.setItem('edgepulse_token', data.token);
+          }
           if (rememberMe) {
             localStorage.setItem('edgepulse_remember_me', '1');
           } else {
@@ -2121,6 +2205,9 @@
         const data = await res.json();
         if (data.status === 'success') {
           currentUser = data.user;
+          if (data.token) {
+            localStorage.setItem('edgepulse_token', data.token);
+          }
           if (rememberMe) {
             localStorage.setItem('edgepulse_remember_me', '1');
           } else {
@@ -2152,6 +2239,9 @@
         const data = await res.json();
         if (data.status === 'success') {
           currentUser = data.user;
+          if (data.token) {
+            localStorage.setItem('edgepulse_token', data.token);
+          }
           if (rememberMe) {
             localStorage.setItem('edgepulse_remember_me', '1');
           } else {
@@ -2169,30 +2259,32 @@
 
     async function logout() {
       try {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        await fetch('/api/auth/logout', { method: 'POST', headers: getAuthHeaders() });
+      } catch (e) {
+        console.error('Logout error:', e);
+      } finally {
         currentUser = null;
         activeSportSelected = false;
+        localStorage.removeItem('edgepulse_token');
         localStorage.removeItem('edgepulse_remember_me');
         sessionStorage.removeItem('edgepulse_session_active');
         showToast('Signed out successfully');
-        showLandingView();
-      } catch (e) {
-        console.error('Logout error:', e);
-        currentUser = null;
-        activeSportSelected = false;
-        localStorage.removeItem('edgepulse_remember_me');
-        sessionStorage.removeItem('edgepulse_session_active');
         showLandingView();
       }
     }
 
     function handleGoogleBtnClick() {
       if (googleClientId && window.google && window.google.accounts && window.google.accounts.id) {
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            console.log('Google One-Tap skipped or not displayed:', notification.getNotDisplayedReason());
-          }
-        });
+        try {
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              console.log('Google One-Tap skipped or not displayed:', notification.getNotDisplayedReason());
+              loginWithGoogle();
+            }
+          });
+        } catch (e) {
+          loginWithGoogle();
+        }
       } else {
         loginWithGoogle();
       }
@@ -2436,7 +2528,7 @@
           if (!lastStateData || lastStateData.active_sport_filter !== meta.filter) {
             try {
               showToast(`Loading ${meta.name} market...`);
-              const res = await fetch(`/api/load_cached?sport=${meta.filter}`, { method: 'POST' });
+              const res = await fetch(`/api/load_cached?sport=${meta.filter}`, { method: 'POST', headers: getAuthHeaders() });
               const data = await res.json();
               if (data.status === 'success' && data.loaded) {
                 showToast(`✅ Loaded ${meta.name} orderbook!`);
@@ -3828,6 +3920,144 @@
     }
 
     // ==========================================
+    // ACTIVITY TIMELOGS (SQLITE AUDIT TRAIL)
+    // ==========================================
+    let cachedActivityLogs = [];
+    let currentLogFilter = 'all';
+
+    function openActivityLogsModal() {
+      const modal = document.getElementById('activity-logs-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      fetchActivityLogs();
+    }
+
+    function closeActivityLogsModal() {
+      const modal = document.getElementById('activity-logs-modal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function fetchActivityLogs() {
+      const container = document.getElementById('activity-logs-list');
+      try {
+        const res = await fetch('/api/activity_logs?limit=100', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.status === 'success' && data.logs) {
+          cachedActivityLogs = data.logs;
+          renderActivityLogs();
+        } else {
+          if (container) container.innerHTML = '<div class="text-center py-12 text-slate-500 text-xs font-mono">No activity recorded yet.</div>';
+        }
+      } catch (err) {
+        if (container) container.innerHTML = '<div class="text-center py-12 text-rose-400 text-xs font-mono">Failed to fetch activity logs.</div>';
+      }
+    }
+
+    function filterActivityLogs(filterType) {
+      currentLogFilter = filterType;
+      ['all', 'views', 'scans', 'logins'].forEach(f => {
+        const btn = document.getElementById(`btn-filter-log-${f}`);
+        if (!btn) return;
+        const matches = (f === 'all' && filterType === 'all') ||
+                        (f === 'views' && filterType === 'view_sport') ||
+                        (f === 'scans' && filterType === 'scan_live') ||
+                        (f === 'logins' && filterType === 'login');
+        if (matches) {
+          btn.className = 'px-2.5 py-1 rounded-lg bg-neonCyan text-black font-bold transition cursor-pointer';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg bg-brandCard text-slate-400 hover:text-white transition cursor-pointer';
+        }
+      });
+      renderActivityLogs();
+    }
+
+    function formatTimeAgo(ts) {
+      const diff = Math.floor(Date.now() / 1000 - ts);
+      if (diff < 5) return 'Just now';
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return `${Math.floor(diff / 86400)}d ago`;
+    }
+
+    function renderActivityLogs() {
+      const container = document.getElementById('activity-logs-list');
+      const badge = document.getElementById('activity-logs-count-badge');
+      if (!container) return;
+
+      let filtered = cachedActivityLogs;
+      if (currentLogFilter === 'view_sport') {
+        filtered = filtered.filter(l => l.action === 'view_sport');
+      } else if (currentLogFilter === 'scan_live') {
+        filtered = filtered.filter(l => l.action === 'scan_live');
+      } else if (currentLogFilter === 'login') {
+        filtered = filtered.filter(l => l.action && l.action.startsWith('login'));
+      }
+
+      if (badge) {
+        badge.innerText = `${filtered.length} event${filtered.length === 1 ? '' : 's'} logged`;
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-slate-500 text-xs font-mono">
+            No activity logs match the selected filter.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(log => {
+        const timeAgo = formatTimeAgo(log.timestamp);
+        
+        let actionBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-bold border border-slate-700 font-mono">${log.action}</span>`;
+        if (log.action === 'view_sport') {
+          actionBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] bg-sky-950/80 text-sky-300 font-bold border border-sky-600/40 font-mono">👁️ VIEW SPORT</span>`;
+        } else if (log.action === 'scan_live') {
+          actionBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-500/40 font-mono">⚡ LIVE SCAN</span>`;
+        } else if (log.action && log.action.startsWith('login')) {
+          actionBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950/80 text-amber-300 font-bold border border-amber-500/40 font-mono">🔑 LOGIN</span>`;
+        }
+
+        const isUserLogged = log.user_email && !log.user_email.startsWith('guest') && log.user_email !== 'Guest (Visitor)';
+        const initial = log.user_name ? log.user_name.charAt(0).toUpperCase() : (isUserLogged ? log.user_email.charAt(0).toUpperCase() : 'G');
+
+        return `
+          <div class="py-3 px-3 sm:px-4 hover:bg-brandCard/40 rounded-xl transition flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div class="flex items-center space-x-3 min-w-0">
+              <div class="w-8 h-8 rounded-full ${isUserLogged ? 'bg-neonCyan/20 text-neonCyan border-neonCyan/40' : 'bg-slate-800 text-slate-400 border-brandBorder'} border flex items-center justify-center font-bold text-xs shrink-0 font-mono">
+                ${initial}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold text-white text-xs truncate font-mono">${log.user_name || log.user_email}</span>
+                  ${isUserLogged ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-neonCyan/20 text-neonCyan font-bold">USER</span>' : '<span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">GUEST</span>'}
+                </div>
+                <div class="text-[11px] text-slate-400 font-mono truncate flex items-center space-x-1.5 mt-0.5">
+                  <span class="text-neonYellow font-semibold">${log.sport_name}</span>
+                  <span class="text-slate-600">•</span>
+                  <span class="text-slate-500 text-[10px]">${log.sport_key}</span>
+                  ${log.ip_address && log.ip_address !== '127.0.0.1' ? `<span class="text-slate-600">•</span><span class="text-slate-500 text-[10px]">${log.ip_address}</span>` : ''}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end space-x-3 shrink-0 pl-11 sm:pl-0">
+              ${actionBadge}
+              <div class="text-right">
+                <div class="text-[11px] text-slate-300 font-mono font-semibold">${timeAgo}</div>
+                <div class="text-[10px] text-slate-500 font-mono">${log.formatted_time}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
     // 3. QUICK TRACK BET MODAL
     // ==========================================
     let currentRenderedAnomalies = [];
@@ -4456,7 +4686,7 @@
     // ==========================================
     async function fetchState() {
       try {
-        const res = await fetch('/api/state');
+        const res = await fetch('/api/state', { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const state = await res.json();
         lastStateData = state;

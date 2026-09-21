@@ -573,20 +573,28 @@ def send_json_response(
         if remember_me:
             handler.send_header(
                 "Set-Cookie",
-                f"session_token={session_cookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age={30 * 86400}",
+                f"session_token={session_cookie}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age={30 * 86400}",
             )
         else:
             handler.send_header(
                 "Set-Cookie",
-                f"session_token={session_cookie}; Path=/; HttpOnly; SameSite=Lax",
+                f"session_token={session_cookie}; Path=/; HttpOnly; SameSite=Lax; Secure",
             )
     elif clear_cookie:
         handler.send_header(
             "Set-Cookie",
-            "session_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
+            "session_token=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0",
         )
     handler.end_headers()
     handler.wfile.write(resp_bytes)
+
+
+def get_client_ip(handler: BaseHTTPRequestHandler) -> str:
+    """Extract client IP handling reverse proxy headers."""
+    xff = handler.headers.get("X-Forwarded-For")
+    if xff:
+        return xff.split(",")[0].strip()
+    return handler.client_address[0] if handler.client_address else "127.0.0.1"
 
 
 FAVICON_SVG = b"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
@@ -667,6 +675,20 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
         elif self.path == "/api/auth/config":
             send_json_response(self, {"google_client_id": GOOGLE_CLIENT_ID})
+            return
+
+        elif self.path.startswith("/api/activity_logs"):
+            limit = 100
+            if "?" in self.path:
+                query = self.path.split("?", 1)[1]
+                for param in query.split("&"):
+                    if param.startswith("limit="):
+                        try:
+                            limit = int(param.split("=", 1)[1])
+                        except ValueError:
+                            pass
+            logs = db.get_activity_logs(limit=limit)
+            send_json_response(self, {"status": "success", "logs": logs, "count": len(logs)})
             return
 
         elif self.path == "/api/state":
@@ -896,6 +918,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 token = db.create_session(user["id"], remember_me=remember_me)
                 if user:
                     user["session_remember_me"] = remember_me
+                db.log_activity(
+                    sport_key="google_auth",
+                    sport_name="Google Sign-In",
+                    action="login_google",
+                    user_id=user["id"],
+                    user_email=user["email"],
+                    user_name=user.get("name", "Google Bettor"),
+                    ip_address=get_client_ip(self),
+                )
                 send_json_response(self, {"status": "success", "user": user, "token": token, "remember_me": remember_me}, 200, session_cookie=token, remember_me=remember_me)
             except ValueError as ve:
                 send_json_response(self, {"status": "error", "message": str(ve)}, 400)
@@ -918,6 +949,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 token = db.create_session(user["id"], remember_me=remember_me)
                 if user:
                     user["session_remember_me"] = remember_me
+                db.log_activity(
+                    sport_key="guest_auth",
+                    sport_name="Guest Demo",
+                    action="login_guest",
+                    user_id=user["id"],
+                    user_email=user["email"],
+                    user_name=user.get("name", "Guest"),
+                    ip_address=get_client_ip(self),
+                )
                 send_json_response(self, {"status": "success", "user": user, "token": token, "remember_me": remember_me}, 200, session_cookie=token, remember_me=remember_me)
             except Exception as e:
                 send_json_response(self, {"status": "error", "message": str(e)}, 400)
@@ -942,6 +982,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
                         clear_old = param.split("=", 1)[1].lower() == "true"
 
             result = run_single_sport_scan(sport_key, clear_old=clear_old)
+            user = get_current_user_from_request(self)
+            ip = get_client_ip(self)
+            db.log_activity(
+                sport_key=sport_key,
+                sport_name=current_active_sport_name,
+                action="scan_live",
+                user_id=user["id"] if user else None,
+                user_email=user["email"] if user else "Guest (Visitor)",
+                user_name=user.get("name", "Guest") if user else "Guest Visitor",
+                ip_address=ip,
+            )
             send_json_response(self, result)
             return
 
@@ -953,6 +1004,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     if param.startswith("sport="):
                         target_sport = param.split("=", 1)[1]
             success = load_cached_odds(target_sport)
+            user = get_current_user_from_request(self)
+            ip = get_client_ip(self)
+            db.log_activity(
+                sport_key=target_sport,
+                sport_name=current_active_sport_name,
+                action="view_sport",
+                user_id=user["id"] if user else None,
+                user_email=user["email"] if user else "Guest (Visitor)",
+                user_name=user.get("name", "Guest") if user else "Guest Visitor",
+                ip_address=ip,
+            )
             send_json_response(self, {
                 "status": "success" if success else "error",
                 "loaded": success,
