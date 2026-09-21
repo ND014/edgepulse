@@ -2312,9 +2312,10 @@
               });
               const signinDiv = document.getElementById('g-id-signin');
               if (signinDiv) {
+                const btnWidth = Math.min(320, Math.max(220, window.innerWidth - 64));
                 window.google.accounts.id.renderButton(
                   signinDiv,
-                  { theme: 'outline', size: 'large', width: '320', text: 'continue_with', shape: 'pill' }
+                  { theme: 'outline', size: 'large', width: btnWidth.toString(), text: 'continue_with', shape: 'pill' }
                 );
                 document.getElementById('btn-custom-google')?.classList.add('hidden');
               }

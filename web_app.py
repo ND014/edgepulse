@@ -30,7 +30,8 @@ from src import db
 ROOT_DIR = Path(__file__).resolve().parent
 ENV_FILE = ROOT_DIR / ".env"
 ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+DEFAULT_GOOGLE_CLIENT_ID = "508845137062-g24ukrhleck76s93hikuqld8qe53nrll.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", DEFAULT_GOOGLE_CLIENT_ID)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 PORT = int(os.environ.get("PORT", 8080))
 SERVER_START_TIME = time.time()
