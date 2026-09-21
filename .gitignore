@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite Databases & Write-Ahead Logs
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# IDE & Editor Directories
+.idea/
+.vscode/
+*.swp
+*.swo

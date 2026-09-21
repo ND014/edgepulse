@@ -1,0 +1,2 @@
+# EdgePulse Odds Anomaly Engine
+# Native Python 3.9+ Standard Library (Zero external pip dependencies required)

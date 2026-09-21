@@ -1,0 +1,308 @@
+{
+  "sport_key": "tennis_atp",
+  "league_used": "tennis_atp",
+  "display_name": "Tennis (ATP & WTA)",
+  "filter_key": "tennis",
+  "sport_enum": "tennis",
+  "quota_remaining": 408,
+  "quota_used": 92,
+  "data": [
+    {
+      "id": "tennis_atp_001",
+      "sport_key": "tennis_atp",
+      "sport_title": "ATP Tour - Masters",
+      "commence_time": "2026-09-21T18:00:00Z",
+      "home_team": "Carlos Alcaraz",
+      "away_team": "Jannik Sinner",
+      "bookmakers": [
+        {
+          "key": "pinnacle",
+          "title": "Pinnacle",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Carlos Alcaraz",
+                  "price": -115
+                },
+                {
+                  "name": "Jannik Sinner",
+                  "price": -105
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Carlos Alcaraz",
+                  "price": -125
+                },
+                {
+                  "name": "Jannik Sinner",
+                  "price": 105
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Carlos Alcaraz",
+                  "price": -120
+                },
+                {
+                  "name": "Jannik Sinner",
+                  "price": 100
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "betonlineag",
+          "title": "BetOnline.ag",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Carlos Alcaraz",
+                  "price": -112
+                },
+                {
+                  "name": "Jannik Sinner",
+                  "price": -108
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "bovada",
+          "title": "Bovada",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Carlos Alcaraz",
+                  "price": -130
+                },
+                {
+                  "name": "Jannik Sinner",
+                  "price": 110
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tennis_atp_002",
+      "sport_key": "tennis_atp",
+      "sport_title": "ATP Tour - Masters",
+      "commence_time": "2026-09-21T20:30:00Z",
+      "home_team": "Novak Djokovic",
+      "away_team": "Alexander Zverev",
+      "bookmakers": [
+        {
+          "key": "pinnacle",
+          "title": "Pinnacle",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Novak Djokovic",
+                  "price": -145
+                },
+                {
+                  "name": "Alexander Zverev",
+                  "price": 125
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Novak Djokovic",
+                  "price": -155
+                },
+                {
+                  "name": "Alexander Zverev",
+                  "price": 130
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Novak Djokovic",
+                  "price": -150
+                },
+                {
+                  "name": "Alexander Zverev",
+                  "price": 122
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "betonlineag",
+          "title": "BetOnline.ag",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Novak Djokovic",
+                  "price": -142
+                },
+                {
+                  "name": "Alexander Zverev",
+                  "price": 120
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Novak Djokovic",
+                  "price": -160
+                },
+                {
+                  "name": "Alexander Zverev",
+                  "price": 135
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tennis_wta_001",
+      "sport_key": "tennis_wta",
+      "sport_title": "WTA Tour - Championships",
+      "commence_time": "2026-09-22T17:00:00Z",
+      "home_team": "Aryna Sabalenka",
+      "away_team": "Iga Swiatek",
+      "bookmakers": [
+        {
+          "key": "pinnacle",
+          "title": "Pinnacle",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Aryna Sabalenka",
+                  "price": 105
+                },
+                {
+                  "name": "Iga Swiatek",
+                  "price": -125
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Aryna Sabalenka",
+                  "price": 115
+                },
+                {
+                  "name": "Iga Swiatek",
+                  "price": -140
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Aryna Sabalenka",
+                  "price": 110
+                },
+                {
+                  "name": "Iga Swiatek",
+                  "price": -135
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "betonlineag",
+          "title": "BetOnline.ag",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                {
+                  "name": "Aryna Sabalenka",
+                  "price": 102
+                },
+                {
+                  "name": "Iga Swiatek",
+                  "price": -122
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cached_at": 1789882379.787185
+}

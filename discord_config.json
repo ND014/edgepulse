@@ -1,0 +1,11 @@
+{
+  "webhook_url": "",
+  "enabled": false,
+  "min_ev": 0.01,
+  "bankroll": 1000.0,
+  "kelly_multiplier": 0.25,
+  "preferred_region": "all",
+  "telegram_token": "",
+  "telegram_chat_id": "",
+  "telegram_enabled": false
+}

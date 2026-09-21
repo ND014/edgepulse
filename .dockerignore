@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.git/
+.gitignore
+.DS_Store
+tests/
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal
+.env
