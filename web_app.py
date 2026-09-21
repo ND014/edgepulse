@@ -212,23 +212,24 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
 
     # 1. Per-Sport Cooldown: If this specific sport was scanned within the cooldown window, serve fresh cache
     if not force and elapsed < SPORT_SCAN_COOLDOWN_SECONDS:
-        loaded = load_cached_odds(filter_key)
-        if loaded:
-            remaining = int(SPORT_SCAN_COOLDOWN_SECONDS - elapsed)
-            return {
-                "status": "success",
-                "cached": True,
-                "cooldown_active": True,
-                "cooldown_remaining": remaining,
-                "sport": display_name,
-                "league": primary_key,
-                "sport_filter": filter_key,
-                "quotes_fetched": len(detected_anomalies),
-                "quota_remaining": quota_remaining,
-                "quota_used": quota_used,
-                "api_calls_used": 0,
-                "message": f"Active orderbook served from real-time cache ({remaining}s refresh cooldown).",
-            }
+        # If this sport is not currently loaded in memory or has 0 anomalies, load it from cache
+        if current_active_sport_filter != filter_key or len(detected_anomalies) == 0:
+            load_cached_odds(filter_key)
+        remaining = int(SPORT_SCAN_COOLDOWN_SECONDS - elapsed)
+        return {
+            "status": "success",
+            "cached": True,
+            "cooldown_active": True,
+            "cooldown_remaining": remaining,
+            "sport": display_name,
+            "league": primary_key,
+            "sport_filter": filter_key,
+            "quotes_fetched": len(detected_anomalies),
+            "quota_remaining": quota_remaining,
+            "quota_used": quota_used,
+            "api_calls_used": 0,
+            "message": f"Active orderbook served from real-time cache ({remaining}s refresh cooldown).",
+        }
 
     # 2. Check if API key is present; if not, gracefully load from disk cache
     if not ODDS_API_KEY:
@@ -488,6 +489,40 @@ def load_cached_odds(target_filter="ufc"):
                                 commence_time=commence_time,
                             )
                             process_quote(q, is_live=True)
+                        elif len(outcomes) == 3 and sport_enum == Sport.SOCCER_DNB:
+                            # Convert 3-way regulation soccer into Draw No Bet (DNB)
+                            draw_outcome = None
+                            non_draw = []
+                            for oc in outcomes:
+                                if oc.get("name", "").strip().lower() in ("draw", "tie"):
+                                    draw_outcome = oc
+                                else:
+                                    non_draw.append(oc)
+                            if len(non_draw) == 2 and draw_outcome:
+                                try:
+                                    from src.math_engine import american_to_decimal, decimal_to_american
+                                    dec_draw = american_to_decimal(float(draw_outcome["price"]))
+                                    if dec_draw > 1.01:
+                                        dnb_factor = 1.0 - (1.0 / dec_draw)
+                                        dec_a = american_to_decimal(float(non_draw[0]["price"])) * dnb_factor
+                                        dec_b = american_to_decimal(float(non_draw[1]["price"])) * dnb_factor
+                                        if dec_a > 1.01 and dec_b > 1.01:
+                                            q = OddsQuote(
+                                                event_id="",
+                                                sport=sport_enum,
+                                                market_type=MarketType.DRAW_NO_BET,
+                                                bookmaker=b_name,
+                                                side_a=non_draw[0]["name"],
+                                                side_b=non_draw[1]["name"],
+                                                side_a_odds=float(decimal_to_american(dec_a)),
+                                                side_b_odds=float(decimal_to_american(dec_b)),
+                                                odds_format=OddsFormat.AMERICAN,
+                                                timestamp=time.time(),
+                                                commence_time=commence_time,
+                                            )
+                                            process_quote(q, is_live=True)
+                                except Exception:
+                                    pass
         print(f"Loaded {len(data)} real events from live cache for {current_active_sport_name}.")
         return True
     except Exception as e:

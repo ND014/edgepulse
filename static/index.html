@@ -2015,7 +2015,7 @@
 
       // Attempt to load from local cache first (works for all 7 sports!)
       showToast(`Loading ${displayName}...`);
-      setFilter(filterKey || 'all');
+      await setFilter(filterKey || 'all', false);
       try {
         const res = await fetch(`/api/load_cached?sport=${filterKey}`, { method: 'POST' });
         const data = await res.json();
@@ -2320,20 +2320,29 @@
       showToast(`Scanning live market for ${displayName}...`);
 
       // 1. Instantly switch tab to this sport
-      setFilter(filterKey || 'all');
+      setFilter(filterKey || 'all', false);
 
-      // 2. Clear out old events so screen refreshes cleanly
-      document.getElementById('anomalies-container').innerHTML = `
-        <div class="col-span-full bg-brandCard border border-brandBorder/60 rounded-xl p-8 text-center text-slate-400">
-          <div class="inline-block h-6 w-6 border-2 border-neonCyan border-t-transparent rounded-full animate-spin mb-2"></div>
-          <p class="text-sm font-mono">Fetching fresh live lines for ${displayName}...</p>
-        </div>
-      `;
-      document.getElementById('events-container').innerHTML = `
-        <div class="bg-brandCard border border-brandBorder/60 rounded-xl p-8 text-center text-slate-400 font-mono">
-          Refreshing market board...
-        </div>
-      `;
+      // 2. Clear out old events ONLY if there is no existing data on screen
+      const anomaliesContainer = document.getElementById('anomalies-container');
+      const eventsContainer = document.getElementById('events-container');
+      const hasExistingData = anomaliesContainer && anomaliesContainer.children.length > 0 && !anomaliesContainer.innerText.includes('Fetching fresh');
+      if (!hasExistingData) {
+        if (anomaliesContainer) {
+          anomaliesContainer.innerHTML = `
+            <div class="col-span-full bg-brandCard border border-brandBorder/60 rounded-xl p-8 text-center text-slate-400">
+              <div class="inline-block h-6 w-6 border-2 border-neonCyan border-t-transparent rounded-full animate-spin mb-2"></div>
+              <p class="text-sm font-mono">Fetching fresh live lines for ${displayName}...</p>
+            </div>
+          `;
+        }
+        if (eventsContainer) {
+          eventsContainer.innerHTML = `
+            <div class="bg-brandCard border border-brandBorder/60 rounded-xl p-8 text-center text-slate-400 font-mono">
+              Refreshing market board...
+            </div>
+          `;
+        }
+      }
 
       try {
         // Clear old sport data on the server and pull the new sport
@@ -2391,7 +2400,17 @@
       if (lastStateData) renderState(lastStateData);
     }
 
-    function setFilter(sport) {
+    const SPORT_TAB_METADATA = {
+      'baseball': { key: 'baseball_mlb', name: 'Baseball (MLB)', filter: 'baseball' },
+      'boxing': { key: 'boxing_boxing', name: 'Boxing', filter: 'boxing' },
+      'ufc': { key: 'mma_mixed_martial_arts', name: 'UFC / MMA', filter: 'ufc' },
+      'basketball_nba': { key: 'basketball_nba', name: 'Basketball (NBA)', filter: 'basketball_nba' },
+      'cricket_t20': { key: 'cricket_t20', name: 'Cricket (T20)', filter: 'cricket_t20' },
+      'soccer_dnb': { key: 'soccer_epl', name: 'Soccer (EPL)', filter: 'soccer_dnb' },
+      'tennis': { key: 'tennis_atp', name: 'Tennis (ATP)', filter: 'tennis' },
+    };
+
+    async function setFilter(sport, switchSportData = true) {
       activeFilter = sport;
       anomalyCurrentPage = 1;
       eventsCurrentPage = 1;
@@ -2404,7 +2423,32 @@
           btn.classList.remove('bg-neonCyan', 'text-black', 'font-bold');
         }
       });
-      fetchState();
+
+      if (sport !== 'all' && switchSportData) {
+        const meta = SPORT_TAB_METADATA[sport];
+        if (meta) {
+          activeSportSelected = true;
+          currentLiveSportKey = meta.key;
+          currentLiveDisplayName = meta.name;
+          currentLiveFilterKey = meta.filter;
+
+          // If the backend doesn't have this sport active or has 0 events for it, load it!
+          if (!lastStateData || lastStateData.active_sport_filter !== meta.filter) {
+            try {
+              showToast(`Loading ${meta.name} market...`);
+              const res = await fetch(`/api/load_cached?sport=${meta.filter}`, { method: 'POST' });
+              const data = await res.json();
+              if (data.status === 'success' && data.loaded) {
+                showToast(`✅ Loaded ${meta.name} orderbook!`);
+              }
+            } catch (e) {
+              console.warn('Error loading sport cache on tab switch:', e);
+            }
+          }
+        }
+      }
+
+      await fetchState();
     }
 
     let searchQuery = '';
