@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>EdgePulse — Real-Time Sports Odds Intelligence & +EV Engine</title>
   
   <!-- Primary Meta Tags & SEO -->
@@ -35,6 +35,9 @@
       darkMode: 'class',
       theme: {
         extend: {
+          screens: {
+            'xs': '420px',
+          },
           colors: {
             brandDark: '#0b0f19',
             brandCard: '#131b2e',
@@ -50,6 +53,15 @@
     }
   </script>
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      max-width: 100vw;
+      width: 100%;
+      overflow-x: hidden;
+      position: relative;
+    }
     .anomaly-card {
       transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
     }
@@ -63,16 +75,16 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-neonCyan selection:text-black overflow-x-hidden">
+<body class="min-h-screen flex flex-col selection:bg-neonCyan selection:text-black overflow-x-hidden w-full">
 
   <!-- TOP NAVBAR -->
-  <header class="border-b border-brandBorder bg-brandDark/95 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <header class="border-b border-brandBorder bg-brandDark/95 backdrop-blur sticky top-0 z-50 w-full">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 min-w-0">
       
       <!-- Brand & Stream Status -->
-      <div onclick="onBrandLogoClick()" class="flex items-center space-x-3 cursor-pointer group" title="Go to Sports Hub">
-        <div id="status-dot" class="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></div>
-        <span class="text-xl font-bold tracking-wider text-white group-hover:text-neonCyan transition">EDGE<span class="text-neonCyan">PULSE</span></span>
+      <div onclick="onBrandLogoClick()" class="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0" title="Go to Sports Hub">
+        <div id="status-dot" class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50 shrink-0"></div>
+        <span class="text-base sm:text-xl font-bold tracking-wider text-white group-hover:text-neonCyan transition">EDGE<span class="text-neonCyan">PULSE</span></span>
         
         <div id="stream-mode-badge" class="hidden md:flex items-center space-x-1.5 bg-brandCard border border-brandBorder px-2.5 py-1 rounded-full text-[11px] font-mono">
           <span id="badge-dot" class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
@@ -81,9 +93,9 @@
       </div>
 
       <!-- Right Controls -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
+      <div class="flex items-center space-x-1 sm:space-x-2.5 shrink-0">
         <!-- Sound Alert Toggle Button -->
-        <button id="nav-sound-btn" onclick="toggleSoundAlerts()" class="flex items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-slate-600 px-2.5 py-1.5 rounded-xl text-xs font-mono transition cursor-pointer" title="Toggle Audio Chimes">
+        <button id="nav-sound-btn" onclick="toggleSoundAlerts()" class="flex items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-slate-600 p-2 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-mono transition cursor-pointer shrink-0" title="Toggle Audio Chimes">
           <svg id="nav-sound-icon-svg" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
           </svg>
@@ -91,7 +103,7 @@
         </button>
 
         <!-- Bet Tracker Nav Button -->
-        <button id="nav-btn-tracker" onclick="showTrackerView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonGreen px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer" title="View Bet Tracker & P&L Ledger">
+        <button id="nav-btn-tracker" onclick="showTrackerView()" class="hidden items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonGreen p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer shrink-0" title="View Bet Tracker & P&L Ledger">
           <svg class="w-3.5 h-3.5 text-neonGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
@@ -100,7 +112,7 @@
         </button>
 
         <!-- Activity Timelogs Nav Button -->
-        <button id="nav-btn-logs" onclick="openActivityLogsModal()" class="flex items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonYellow px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer" title="View SQLite User Activity & Timelogs">
+        <button id="nav-btn-logs" onclick="openActivityLogsModal()" class="flex items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonYellow p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer shrink-0" title="View SQLite User Activity & Timelogs">
           <svg class="w-3.5 h-3.5 text-neonYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
@@ -108,7 +120,7 @@
         </button>
 
         <!-- Back to Sports Hub Button (visible when on Dashboard) -->
-        <button id="nav-btn-hub" onclick="showSportsHomeView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonCyan px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition shadow-sm cursor-pointer" title="Choose another sport or league">
+        <button id="nav-btn-hub" onclick="showSportsHomeView()" class="hidden items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonCyan px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition shadow-sm cursor-pointer shrink-0" title="Choose another sport or league">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
@@ -116,7 +128,7 @@
         </button>
 
         <!-- User Profile Pill (Opens Side Menu Drawer) -->
-        <button id="user-profile-badge" onclick="openProfileDrawer()" class="hidden items-center space-x-2 bg-brandCard hover:bg-slate-800/80 border border-brandBorder hover:border-neonCyan px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono shadow-sm transition active:scale-95 group cursor-pointer" title="Open Account & Profile Settings">
+        <button id="user-profile-badge" onclick="openProfileDrawer()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800/80 border border-brandBorder hover:border-neonCyan p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono shadow-sm transition active:scale-95 group cursor-pointer shrink-0" title="Open Account & Profile Settings">
           <div id="user-avatar" class="w-6 h-6 rounded-full bg-neonCyan/20 text-neonCyan font-bold flex items-center justify-center text-[10px] border border-neonCyan/40 overflow-hidden shrink-0 group-hover:border-neonCyan transition">
             <span id="user-avatar-initials">?</span>
           </div>
@@ -124,13 +136,13 @@
             <div id="user-name-display" class="font-bold text-white text-[11px] leading-tight truncate max-w-[110px] group-hover:text-neonCyan transition">User</div>
             <div id="user-provider-badge" class="text-[9px] text-neonCyan font-mono uppercase leading-none">LOCAL</div>
           </div>
-          <svg class="w-3 h-3 text-slate-400 group-hover:text-neonCyan transition shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="hidden sm:block w-3 h-3 text-slate-400 group-hover:text-neonCyan transition shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
 
-        <!-- Proper Dedicated Logout Button -->
-        <button id="nav-logout-btn" onclick="logout()" class="hidden items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-brandCard hover:bg-rose-950/40 border border-brandBorder hover:border-rose-500/60 text-slate-300 hover:text-rose-300 text-xs font-mono font-bold transition active:scale-95 shadow-sm" title="Log Out of EdgePulse">
+        <!-- Proper Dedicated Logout Button (Hidden on small screens since profile drawer contains logout) -->
+        <button id="nav-logout-btn" onclick="logout()" class="hidden md:flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-brandCard hover:bg-rose-950/40 border border-brandBorder hover:border-rose-500/60 text-slate-300 hover:text-rose-300 text-xs font-mono font-bold transition active:scale-95 shadow-sm shrink-0" title="Log Out of EdgePulse">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
           </svg>
@@ -138,25 +150,25 @@
         </button>
 
         <!-- Nav Login Button (shown on landing page or when logged out) -->
-        <button id="nav-login-btn" onclick="showLandingView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder px-3 py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition">
-          <span>Sign In<span class="hidden sm:inline"> / Register</span></span>
+        <button id="nav-login-btn" onclick="showLandingView()" class="hidden items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder px-2.5 py-1.5 sm:px-3 rounded-xl text-xs font-mono text-neonCyan font-bold transition shrink-0">
+          <span>Sign In</span>
         </button>
 
-        <!-- Engine Feed Status (Shown on desktop & tablet to keep mobile header clean) -->
-        <div class="hidden lg:flex items-center space-x-2 bg-brandCard border border-brandBorder px-3 py-1.5 rounded-lg text-xs font-mono">
+        <!-- Engine Feed Status (Shown on desktop to keep mobile header clean) -->
+        <div class="hidden lg:flex items-center space-x-2 bg-brandCard border border-brandBorder px-3 py-1.5 rounded-lg text-xs font-mono shrink-0">
           <span class="h-1.5 w-1.5 rounded-full bg-neonGreen animate-pulse"></span>
           <span class="text-slate-400">Feed:</span>
           <span id="quota-text" class="text-neonGreen font-bold">REAL-TIME</span>
         </div>
 
         <!-- Live Sports Dropdown Menu -->
-        <div class="relative">
-          <button id="btn-live-menu" onclick="toggleLiveMenu()" class="flex items-center space-x-1.5 sm:space-x-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-2.5 sm:px-3.5 py-2 rounded-xl border border-slate-700 hover:border-neonCyan transition active:scale-95 shadow-sm">
+        <div class="relative shrink-0">
+          <button id="btn-live-menu" onclick="toggleLiveMenu()" class="flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-700 hover:border-neonCyan transition active:scale-95 shadow-sm shrink-0" title="Sports & Leagues">
             <svg class="w-4 h-4 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
             </svg>
-            <span id="live-btn-label" class="truncate max-w-[85px] sm:max-w-none">Sports & Leagues</span>
-            <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span id="live-btn-label" class="hidden sm:inline truncate max-w-[85px]">Sports</span>
+            <svg class="hidden sm:block w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
@@ -391,8 +403,8 @@
           </div>
         </div>
 
-        <!-- Quick Refresh Button (Navbar) -->
-        <button id="nav-btn-refresh" onclick="refreshCurrentSport()" title="Re-scan live odds" class="hidden items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-lg bg-neonCyan/15 border border-neonCyan/40 text-neonCyan hover:bg-neonCyan/25 text-xs font-mono font-bold transition active:scale-95 shadow-sm">
+        <!-- Quick Refresh Button (Navbar, Desktop only) -->
+        <button id="nav-btn-refresh" onclick="refreshCurrentSport()" title="Re-scan live odds" class="hidden sm:items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-neonCyan/15 border border-neonCyan/40 text-neonCyan hover:bg-neonCyan/25 text-xs font-mono font-bold transition active:scale-95 shadow-sm shrink-0">
           <svg id="nav-refresh-spinner" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
@@ -410,41 +422,41 @@
   </div>
 
   <!-- LANDING & AUTHENTICATION VIEW -->
-  <div id="landing-view" class="flex-1 flex flex-col justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+  <div id="landing-view" class="flex-1 flex flex-col justify-center max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 w-full min-w-0">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
       
       <!-- Left Column: Value Proposition & Key Pillars -->
-      <div class="lg:col-span-7 space-y-6">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-neonCyan/10 border border-neonCyan/30 text-neonCyan text-xs font-mono font-bold tracking-wider">
-          <span class="h-1.5 w-1.5 rounded-full bg-neonCyan"></span>
-          <span>INSTITUTIONAL-GRADE +EV SPORTS ENGINE</span>
+      <div class="lg:col-span-7 space-y-4 sm:space-y-6">
+        <div class="inline-flex items-center space-x-2 px-2.5 sm:px-3 py-1 rounded-full bg-neonCyan/10 border border-neonCyan/30 text-neonCyan text-[10px] sm:text-xs font-mono font-bold tracking-wide sm:tracking-wider max-w-full">
+          <span class="h-1.5 w-1.5 rounded-full bg-neonCyan shrink-0"></span>
+          <span class="truncate">+EV SPORTS INTELLIGENCE ENGINE</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
           Beat the Sportsbooks with <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonCyan via-cyan-300 to-neonGreen">Mathematical Precision</span>
         </h1>
 
-        <p class="text-base text-slate-300 leading-relaxed font-normal max-w-2xl">
+        <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-normal max-w-2xl">
           Exploit retail bookmaker pricing lags against global sharp benchmarks. Continuous market orderbooks, Kelly Criterion bankroll protection, real-time audio & visual anomaly alerts, and 1-click sportsbook routing.
         </p>
 
         <!-- 3 Feature Pillars -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-          <div class="bg-brandCard/90 border border-brandBorder/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-1 sm:pt-2">
+          <div class="bg-brandCard/90 border border-brandBorder/80 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between shadow-md">
             <div class="w-8 h-8 rounded-xl bg-neonCyan/15 text-neonCyan flex items-center justify-center mb-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
             </div>
             <div class="font-bold text-white text-sm mb-1">Sharp Consensus</div>
             <p class="text-xs text-slate-400 leading-relaxed">True devigged market probabilities powered by Pinnacle & BetOnline.</p>
           </div>
-          <div class="bg-brandCard/90 border border-brandBorder/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+          <div class="bg-brandCard/90 border border-brandBorder/80 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between shadow-md">
             <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
             </div>
             <div class="font-bold text-white text-sm mb-1">Kelly Bet Sizing</div>
             <p class="text-xs text-slate-400 leading-relaxed">Mathematical dollar stakes calibrated to your bankroll to eliminate guesswork.</p>
           </div>
-          <div class="bg-brandCard/90 border border-brandBorder/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+          <div class="bg-brandCard/90 border border-brandBorder/80 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between shadow-md">
             <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
             </div>
@@ -453,16 +465,16 @@
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 pt-2 text-xs font-mono text-slate-400">
-          <span class="flex items-center space-x-1.5 bg-brandDark/80 border border-brandBorder px-3 py-1 rounded-full">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2 text-[11px] sm:text-xs font-mono text-slate-400">
+          <span class="flex items-center space-x-1.5 bg-brandDark/80 border border-brandBorder px-2.5 sm:px-3 py-1 rounded-full">
             <span class="text-neonGreen">●</span>
             <span>70+ Global Books</span>
           </span>
-          <span class="flex items-center space-x-1.5 bg-brandDark/80 border border-brandBorder px-3 py-1 rounded-full">
+          <span class="flex items-center space-x-1.5 bg-brandDark/80 border border-brandBorder px-2.5 sm:px-3 py-1 rounded-full">
             <span class="text-neonCyan">●</span>
             <span>Sub-Second Latency</span>
           </span>
-          <span class="flex items-center space-x-1.5 bg-brandDark/80 border border-brandBorder px-3 py-1 rounded-full">
+          <span class="flex items-center space-x-1.5 bg-brandDark/80 border border-brandBorder px-2.5 sm:px-3 py-1 rounded-full">
             <span class="text-amber-400">●</span>
             <span>ACID SQLite Persistence</span>
           </span>
@@ -470,8 +482,8 @@
       </div>
 
       <!-- Right Column: Authentication Card -->
-      <div class="lg:col-span-5">
-        <div class="bg-brandCard border border-brandBorder/90 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+      <div class="lg:col-span-5 w-full min-w-0">
+        <div class="bg-brandCard border border-brandBorder/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden w-full">
           
           <div class="mb-6">
             <h2 id="auth-title" class="text-xl font-bold text-white">Sign In to EdgePulse</h2>
@@ -561,36 +573,36 @@
   </div>
 
   <!-- SPORTS HUB / HOMEPAGE VIEW (Post-Login Selector) -->
-  <section id="sports-home-view" class="hidden flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+  <section id="sports-home-view" class="hidden flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 w-full space-y-6 sm:space-y-8 min-w-0">
     <!-- Welcome Banner & Quick Telemetry -->
-    <div class="relative overflow-hidden bg-gradient-to-r from-brandCard via-brandCard/90 to-brandDark border border-brandBorder/90 rounded-3xl p-6 sm:p-8 shadow-2xl">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
+    <div class="relative overflow-hidden bg-gradient-to-r from-brandCard via-brandCard/90 to-brandDark border border-brandBorder/90 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 relative z-10">
         <div class="space-y-2 max-w-2xl">
-          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-neonCyan/10 border border-neonCyan/30 text-neonCyan text-xs font-mono font-bold tracking-wider">
+          <div class="inline-flex items-center space-x-2 px-2.5 sm:px-3 py-1 rounded-full bg-neonCyan/10 border border-neonCyan/30 text-neonCyan text-[10px] sm:text-xs font-mono font-bold tracking-wider">
             <span class="h-2 w-2 rounded-full bg-neonGreen animate-pulse"></span>
             <span>SPORTS HUB & MARKET DISCOVERY</span>
           </div>
-          <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h1 class="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
             Welcome, <span id="hub-user-name" class="text-transparent bg-clip-text bg-gradient-to-r from-neonCyan to-cyan-300">Trader</span> 👋
           </h1>
-          <p class="text-sm text-slate-300 leading-relaxed">
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
             Select a sport or league below to launch real-time odds comparison, devigged market probabilities, and mathematical +EV bet discovery.
           </p>
         </div>
 
         <!-- Quick Status Metrics Cards -->
-        <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 font-mono text-xs">
-          <div class="bg-brandDark/80 border border-brandBorder px-4 py-3 rounded-2xl flex flex-col justify-center min-w-[120px]">
-            <span class="text-slate-400 text-[10px] uppercase font-bold">Feed Status</span>
-            <span id="hub-quota-metric" class="text-neonCyan text-base font-bold">Real-Time</span>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto font-mono text-xs shrink-0">
+          <div class="bg-brandDark/80 border border-brandBorder p-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl flex flex-col justify-center text-center sm:text-left">
+            <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase font-bold">Feed</span>
+            <span id="hub-quota-metric" class="text-neonCyan text-xs sm:text-base font-bold truncate">Real-Time</span>
           </div>
-          <div class="bg-brandDark/80 border border-brandBorder px-4 py-3 rounded-2xl flex flex-col justify-center min-w-[120px]">
-            <span class="text-slate-400 text-[10px] uppercase font-bold">Connected Books</span>
-            <span id="hub-books-metric" class="text-neonGreen text-base font-bold">70+ Books</span>
+          <div class="bg-brandDark/80 border border-brandBorder p-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl flex flex-col justify-center text-center sm:text-left">
+            <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase font-bold">Books</span>
+            <span id="hub-books-metric" class="text-neonGreen text-xs sm:text-base font-bold truncate">70+ Books</span>
           </div>
-          <div class="bg-brandDark/80 border border-brandBorder px-4 py-3 rounded-2xl flex flex-col justify-center min-w-[120px]">
-            <span class="text-slate-400 text-[10px] uppercase font-bold">Active Engine</span>
-            <span class="text-amber-400 text-base font-bold">Pinnacle Sharp</span>
+          <div class="bg-brandDark/80 border border-brandBorder p-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl flex flex-col justify-center text-center sm:text-left">
+            <span class="text-slate-400 text-[9px] sm:text-[10px] uppercase font-bold">Benchmark</span>
+            <span class="text-amber-400 text-xs sm:text-base font-bold truncate">Pinnacle</span>
           </div>
         </div>
       </div>
@@ -873,85 +885,85 @@
   </section>
 
   <!-- MAIN DASHBOARD CONTAINER -->
-  <main id="dashboard-view" class="hidden flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
+  <main id="dashboard-view" class="hidden flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 w-full space-y-4 sm:space-y-6 min-w-0">
 
     <!-- ACTIVE MODE BANNER -->
-    <div id="mode-banner" class="flex flex-col sm:flex-row sm:items-center justify-between bg-brandCard border border-brandBorder/80 rounded-xl px-4 py-2.5 text-xs font-mono gap-2">
-      <div class="flex items-center space-x-3">
-        <button onclick="showSportsHomeView()" class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-brandDark border border-brandBorder hover:border-neonCyan text-slate-300 hover:text-neonCyan transition text-xs font-mono shadow-sm" title="Return to Sports Hub">
-          <span>← Sports Hub</span>
+    <div id="mode-banner" class="flex flex-col sm:flex-row sm:items-center justify-between bg-brandCard border border-brandBorder/80 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-xs font-mono gap-2 min-w-0">
+      <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+        <button onclick="showSportsHomeView()" class="flex items-center space-x-1 px-2 py-1 sm:px-2.5 rounded-lg bg-brandDark border border-brandBorder hover:border-neonCyan text-slate-300 hover:text-neonCyan transition text-xs font-mono shadow-sm shrink-0" title="Return to Sports Hub">
+          <span>← Hub</span>
         </button>
-        <div class="flex items-center space-x-1.5">
-          <span class="text-slate-400">Current Sport:</span>
-          <span id="active-view-name" class="text-neonCyan font-bold">Live Real-Time Market Board</span>
+        <div class="flex items-center space-x-1.5 min-w-0 truncate">
+          <span class="text-slate-400 hidden xs:inline">Sport:</span>
+          <span id="active-view-name" class="text-neonCyan font-bold truncate">Live Real-Time Market Board</span>
         </div>
       </div>
-      <div class="flex items-center space-x-3 text-slate-400">
+      <div class="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3 text-slate-400 shrink-0">
         <!-- Banner Refresh Button -->
-        <button id="btn-refresh-live" onclick="refreshCurrentSport()" class="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-neonCyan text-black hover:bg-cyan-300 font-bold transition active:scale-95 text-xs font-mono shadow-md shadow-neonCyan/20">
+        <button id="btn-refresh-live" onclick="refreshCurrentSport()" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-neonCyan text-black hover:bg-cyan-300 font-bold transition active:scale-95 text-xs font-mono shadow-md shadow-neonCyan/20 shrink-0">
           <svg id="banner-refresh-spinner" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          <span id="banner-refresh-label">Refresh Live Odds</span>
+          <span id="banner-refresh-label">Refresh</span>
         </button>
 
-        <span id="active-matches-count">Loading matches...</span>
+        <span id="active-matches-count" class="truncate text-[11px] sm:text-xs">Loading...</span>
       </div>
     </div>
 
     <!-- QUICK STAKING & CONTROLS STRIP (Option 1 & Option 3 & EV Filter) -->
-    <div class="bg-brandCard border border-brandBorder/90 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-lg">
-      <div class="flex flex-wrap items-center gap-3">
+    <div class="bg-brandCard border border-brandBorder/90 rounded-2xl p-3 sm:p-3.5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 text-xs font-mono shadow-lg min-w-0">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
         <!-- Dashboard Mode Switcher -->
         <div class="flex items-center bg-brandDark/90 border border-brandBorder rounded-xl p-1 shrink-0">
-          <button id="btn-mode-ev" onclick="switchDashboardMode('ev')" class="px-3 py-1.5 rounded-lg font-bold transition text-black bg-neonCyan cursor-pointer">+EV Bets</button>
-          <button id="btn-mode-arb" onclick="switchDashboardMode('arb')" class="px-3 py-1.5 rounded-lg font-bold transition text-slate-400 hover:text-white cursor-pointer">Arbitrage (<span id="arb-count-badge">0</span>)</button>
+          <button id="btn-mode-ev" onclick="switchDashboardMode('ev')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition text-black bg-neonCyan cursor-pointer">+EV Bets</button>
+          <button id="btn-mode-arb" onclick="switchDashboardMode('arb')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition text-slate-400 hover:text-white cursor-pointer">Arb (<span id="arb-count-badge">0</span>)</button>
         </div>
 
         <!-- Bankroll Input -->
-        <div class="flex items-center space-x-2 bg-brandDark/90 border border-brandBorder rounded-xl px-3 py-2">
-          <span class="text-slate-400 font-semibold">Bankroll:</span>
+        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
+          <span class="text-slate-400 font-semibold text-[11px]">Roll:</span>
           <span class="text-neonGreen font-bold">$</span>
-          <input id="input-bankroll" type="number" min="10" step="50" value="1000" oninput="updateStakingSettings()" class="w-20 bg-transparent text-white font-bold focus:outline-none focus:text-neonGreen" />
+          <input id="input-bankroll" type="number" min="10" step="50" value="1000" oninput="updateStakingSettings()" class="w-16 bg-transparent text-white font-bold focus:outline-none focus:text-neonGreen text-xs" />
         </div>
 
         <!-- Kelly Multiplier Selector -->
-        <div class="flex items-center space-x-2 bg-brandDark/90 border border-brandBorder rounded-xl px-3 py-2">
-          <span class="text-slate-400 font-semibold">Bet Sizing:</span>
-          <select id="select-kelly" onchange="updateStakingSettings()" class="bg-transparent text-neonCyan font-bold focus:outline-none cursor-pointer">
-            <option value="0.25" class="bg-brandDark text-white">Quarter Kelly (0.25x - Recommended)</option>
-            <option value="0.5" class="bg-brandDark text-white">Half Kelly (0.50x)</option>
-            <option value="1.0" class="bg-brandDark text-white">Full Kelly (1.00x)</option>
+        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
+          <span class="text-slate-400 font-semibold text-[11px]">Kelly:</span>
+          <select id="select-kelly" onchange="updateStakingSettings()" class="bg-transparent text-neonCyan font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-none truncate text-xs">
+            <option value="0.25" class="bg-brandDark text-white">0.25x (Quarter)</option>
+            <option value="0.5" class="bg-brandDark text-white">0.50x (Half)</option>
+            <option value="1.0" class="bg-brandDark text-white">1.00x (Full)</option>
           </select>
         </div>
 
         <!-- Min EV Threshold Filter -->
-        <div class="flex items-center space-x-2 bg-brandDark/90 border border-brandBorder rounded-xl px-3 py-2">
-          <span class="text-slate-400 font-semibold">Min Edge:</span>
-          <select id="select-min-ev" onchange="changeMinEV(this.value)" class="bg-transparent text-neonYellow font-bold focus:outline-none cursor-pointer">
-            <option value="0.01" selected>≥ +1.0% Profit (Active)</option>
-            <option value="0.02">≥ +2.0% Profit</option>
-            <option value="0.03">≥ +3.0% Profit</option>
-            <option value="0.05">≥ +5.0% Profit</option>
+        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
+          <span class="text-slate-400 font-semibold text-[11px]">Edge:</span>
+          <select id="select-min-ev" onchange="changeMinEV(this.value)" class="bg-transparent text-neonYellow font-bold focus:outline-none cursor-pointer max-w-[100px] sm:max-w-none truncate text-xs">
+            <option value="0.01" selected>≥ +1.0%</option>
+            <option value="0.02">≥ +2.0%</option>
+            <option value="0.03">≥ +3.0%</option>
+            <option value="0.05">≥ +5.0%</option>
           </select>
         </div>
 
         <!-- Bookmaker Geo-Region Filter -->
-        <div class="flex items-center space-x-2 bg-brandDark/90 border border-brandBorder rounded-xl px-3 py-2" title="Filter sportsbooks accessible in your country/region">
-          <span class="text-slate-400 font-semibold">Region:</span>
-          <select id="select-region" onchange="changeRegion(this.value)" class="bg-transparent text-neonGreen font-bold focus:outline-none cursor-pointer">
-            <option value="all" selected>All Global Books</option>
-            <option value="in">India & Global (1xBet, Bet365, Bovada)</option>
-            <option value="us">United States (DraftKings, FanDuel, BetMGM)</option>
-            <option value="uk">UK & Ireland (Sky Bet, William Hill, Betfair)</option>
-            <option value="eu">Europe (Pinnacle, Unibet, Betclic)</option>
-            <option value="au">Australia (Sportsbet, TAB, Neds)</option>
+        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0" title="Filter sportsbooks accessible in your country/region">
+          <span class="text-slate-400 font-semibold text-[11px]">Region:</span>
+          <select id="select-region" onchange="changeRegion(this.value)" class="bg-transparent text-neonGreen font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-none truncate text-xs">
+            <option value="all" selected>All Books</option>
+            <option value="in">India / Global</option>
+            <option value="us">United States</option>
+            <option value="uk">UK & Ireland</option>
+            <option value="eu">Europe</option>
+            <option value="au">Australia</option>
           </select>
         </div>
       </div>
 
       <!-- Live Search / Filter Input -->
-      <div class="flex-1 min-w-[220px] max-w-sm">
+      <div class="w-full sm:flex-1 sm:min-w-[180px] sm:max-w-sm mt-1 sm:mt-0">
         <div class="relative">
           <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1190,7 +1202,7 @@
   </main>
 
   <!-- BET TRACKER & P&L PERFORMANCE LEDGER VIEW -->
-  <main id="tracker-view" class="hidden flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
+  <main id="tracker-view" class="hidden flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 w-full space-y-4 sm:space-y-6 min-w-0">
     <!-- Top Action Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-brandCard border border-brandBorder/80 rounded-2xl p-4 gap-4">
       <div class="flex items-center space-x-3">
@@ -1453,7 +1465,7 @@
   <!-- User Profile Slide-Out Side Menu Drawer -->
   <div id="profile-drawer-backdrop" onclick="closeProfileDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-  <aside id="profile-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[460px] md:w-[500px] bg-brandDark border-l border-brandBorder shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col font-sans backdrop-blur-2xl">
+  <aside id="profile-drawer" class="hidden fixed top-0 right-0 h-full w-full max-w-full sm:w-[460px] md:w-[500px] bg-brandDark border-l border-brandBorder shadow-2xl z-50 transform translate-x-full transition-all duration-300 ease-in-out flex flex-col font-sans backdrop-blur-2xl">
     <!-- Top Bar -->
     <div class="px-6 py-4 border-b border-brandBorder/80 flex items-center justify-between bg-brandCard/60 shrink-0">
       <div class="flex items-center space-x-2.5">
@@ -3348,6 +3360,8 @@
       const drawer = document.getElementById('profile-drawer');
 
       if (backdrop && drawer) {
+        drawer.classList.remove('hidden');
+        void drawer.offsetWidth; // force DOM reflow
         backdrop.classList.remove('pointer-events-none', 'opacity-0');
         backdrop.classList.add('opacity-100', 'pointer-events-auto');
         drawer.classList.remove('translate-x-full');
@@ -3366,6 +3380,11 @@
         drawer.classList.remove('translate-x-0');
         drawer.classList.add('translate-x-full');
         document.body.style.overflow = '';
+        setTimeout(() => {
+          if (drawer.classList.contains('translate-x-full')) {
+            drawer.classList.add('hidden');
+          }
+        }, 320);
       }
     }
 
