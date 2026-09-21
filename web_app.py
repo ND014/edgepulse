@@ -531,6 +531,9 @@ def send_json_response(
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json")
     handler.send_header("Content-Length", str(len(resp_bytes)))
+    handler.send_header("X-Content-Type-Options", "nosniff")
+    handler.send_header("X-Frame-Options", "SAMEORIGIN")
+    handler.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
     if session_cookie:
         if remember_me:
             handler.send_header(
@@ -574,6 +577,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Content-Length", str(len(content)))
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("X-Frame-Options", "SAMEORIGIN")
+                self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
                 self.end_headers()
                 self.wfile.write(content)
             else:
