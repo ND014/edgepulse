@@ -2294,7 +2294,7 @@
       try {
         const res = await fetch('/api/auth/config');
         const data = await res.json();
-        googleClientId = data.google_client_id;
+        googleClientId = data.google_client_id || '508845137062-g24ukrhleck76s93hikuqld8qe53nrll.apps.googleusercontent.com';
         if (!googleClientId) return;
 
         function renderGoogleUI() {

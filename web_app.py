@@ -675,7 +675,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
 
         elif self.path == "/api/auth/config":
-            send_json_response(self, {"google_client_id": GOOGLE_CLIENT_ID})
+            send_json_response(self, {"google_client_id": GOOGLE_CLIENT_ID or DEFAULT_GOOGLE_CLIENT_ID})
             return
 
         elif self.path.startswith("/api/activity_logs"):
