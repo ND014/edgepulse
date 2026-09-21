@@ -5,7 +5,8 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8080 \
-    DATABASE_PATH=/app/data/edgepulse.db
+    DATABASE_PATH=/app/data/edgepulse.db \
+    GOOGLE_CLIENT_ID=508845137062-g24ukrhleck76s93hikuqld8qe53nrll.apps.googleusercontent.com
 
 WORKDIR /app
 
