@@ -63,7 +63,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-neonCyan selection:text-black">
+<body class="min-h-screen flex flex-col selection:bg-neonCyan selection:text-black overflow-x-hidden">
 
   <!-- TOP NAVBAR -->
   <header class="border-b border-brandBorder bg-brandDark/95 backdrop-blur sticky top-0 z-50">
@@ -91,24 +91,24 @@
         </button>
 
         <!-- Bet Tracker Nav Button -->
-        <button id="nav-btn-tracker" onclick="showTrackerView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonGreen px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer" title="View Bet Tracker & P&L Ledger">
+        <button id="nav-btn-tracker" onclick="showTrackerView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonGreen px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer" title="View Bet Tracker & P&L Ledger">
           <svg class="w-3.5 h-3.5 text-neonGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
-          <span class="text-white">Tracker</span>
+          <span class="text-white hidden sm:inline">Tracker</span>
           <span id="tracker-pending-badge" class="hidden px-1.5 py-0.2 rounded-full text-[9px] bg-neonGreen/20 text-neonGreen font-bold border border-neonGreen/40">0</span>
         </button>
 
         <!-- Back to Sports Hub Button (visible when on Dashboard) -->
-        <button id="nav-btn-hub" onclick="showSportsHomeView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonCyan px-3 py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition shadow-sm cursor-pointer" title="Choose another sport or league">
+        <button id="nav-btn-hub" onclick="showSportsHomeView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonCyan px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition shadow-sm cursor-pointer" title="Choose another sport or league">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
-          <span>Sports Hub</span>
+          <span><span class="hidden sm:inline">Sports </span>Hub</span>
         </button>
 
         <!-- User Profile Pill (Opens Side Menu Drawer) -->
-        <button id="user-profile-badge" onclick="openProfileDrawer()" class="hidden items-center space-x-2 bg-brandCard hover:bg-slate-800/80 border border-brandBorder hover:border-neonCyan px-3 py-1.5 rounded-xl text-xs font-mono shadow-sm transition active:scale-95 group cursor-pointer" title="Open Account & Profile Settings">
+        <button id="user-profile-badge" onclick="openProfileDrawer()" class="hidden items-center space-x-2 bg-brandCard hover:bg-slate-800/80 border border-brandBorder hover:border-neonCyan px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-mono shadow-sm transition active:scale-95 group cursor-pointer" title="Open Account & Profile Settings">
           <div id="user-avatar" class="w-6 h-6 rounded-full bg-neonCyan/20 text-neonCyan font-bold flex items-center justify-center text-[10px] border border-neonCyan/40 overflow-hidden shrink-0 group-hover:border-neonCyan transition">
             <span id="user-avatar-initials">?</span>
           </div>
@@ -122,20 +122,20 @@
         </button>
 
         <!-- Proper Dedicated Logout Button -->
-        <button id="nav-logout-btn" onclick="logout()" class="hidden items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-brandCard hover:bg-rose-950/40 border border-brandBorder hover:border-rose-500/60 text-slate-300 hover:text-rose-300 text-xs font-mono font-bold transition active:scale-95 shadow-sm" title="Log Out of EdgePulse">
+        <button id="nav-logout-btn" onclick="logout()" class="hidden items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-brandCard hover:bg-rose-950/40 border border-brandBorder hover:border-rose-500/60 text-slate-300 hover:text-rose-300 text-xs font-mono font-bold transition active:scale-95 shadow-sm" title="Log Out of EdgePulse">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
           </svg>
-          <span>Log Out</span>
+          <span class="hidden sm:inline">Log Out</span>
         </button>
 
         <!-- Nav Login Button (shown on landing page or when logged out) -->
         <button id="nav-login-btn" onclick="showLandingView()" class="hidden items-center space-x-1.5 bg-brandCard hover:bg-slate-800 border border-brandBorder px-3 py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition">
-          <span>Sign In / Register</span>
+          <span>Sign In<span class="hidden sm:inline"> / Register</span></span>
         </button>
 
-        <!-- Engine Feed Status -->
-        <div class="flex items-center space-x-2 bg-brandCard border border-brandBorder px-3 py-1.5 rounded-lg text-xs font-mono">
+        <!-- Engine Feed Status (Shown on desktop & tablet to keep mobile header clean) -->
+        <div class="hidden lg:flex items-center space-x-2 bg-brandCard border border-brandBorder px-3 py-1.5 rounded-lg text-xs font-mono">
           <span class="h-1.5 w-1.5 rounded-full bg-neonGreen animate-pulse"></span>
           <span class="text-slate-400">Feed:</span>
           <span id="quota-text" class="text-neonGreen font-bold">REAL-TIME</span>
@@ -143,18 +143,18 @@
 
         <!-- Live Sports Dropdown Menu -->
         <div class="relative">
-          <button id="btn-live-menu" onclick="toggleLiveMenu()" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl border border-slate-700 hover:border-neonCyan transition active:scale-95 shadow-sm">
-            <svg class="w-4 h-4 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button id="btn-live-menu" onclick="toggleLiveMenu()" class="flex items-center space-x-1.5 sm:space-x-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-2.5 sm:px-3.5 py-2 rounded-xl border border-slate-700 hover:border-neonCyan transition active:scale-95 shadow-sm">
+            <svg class="w-4 h-4 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
             </svg>
-            <span id="live-btn-label">Sports & Leagues</span>
-            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span id="live-btn-label" class="truncate max-w-[85px] sm:max-w-none">Sports & Leagues</span>
+            <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
 
-          <!-- Dropdown Panel (Comprehensive Sports & Leagues Menu) -->
-          <div id="live-dropdown" class="hidden absolute right-0 mt-2 w-96 md:w-[460px] max-h-[78vh] overflow-y-auto bg-brandCard border border-brandBorder rounded-2xl shadow-2xl p-3 z-50 space-y-3 backdrop-blur-xl divide-y divide-brandBorder/40">
+          <!-- Dropdown Panel (Comprehensive Sports & Leagues Menu, fits mobile viewports without overflowing) -->
+          <div id="live-dropdown" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 md:w-[460px] max-w-[460px] max-h-[78vh] overflow-y-auto bg-brandCard border border-brandBorder rounded-2xl shadow-2xl p-3 z-50 space-y-3 backdrop-blur-xl divide-y divide-brandBorder/40">
             <div class="px-2 py-1.5">
               <div class="text-xs font-bold text-white uppercase tracking-wider">Check Real-World Odds By League</div>
               <div class="text-[11px] text-slate-400 mt-0.5">Click any league to scan real-time quotes and update market orderbooks.</div>
@@ -384,11 +384,11 @@
         </div>
 
         <!-- Quick Refresh Button (Navbar) -->
-        <button id="nav-btn-refresh" onclick="refreshCurrentSport()" title="Re-scan live odds" class="hidden items-center space-x-1.5 px-3 py-2 rounded-lg bg-neonCyan/15 border border-neonCyan/40 text-neonCyan hover:bg-neonCyan/25 text-xs font-mono font-bold transition active:scale-95 shadow-sm">
+        <button id="nav-btn-refresh" onclick="refreshCurrentSport()" title="Re-scan live odds" class="hidden items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-lg bg-neonCyan/15 border border-neonCyan/40 text-neonCyan hover:bg-neonCyan/25 text-xs font-mono font-bold transition active:scale-95 shadow-sm">
           <svg id="nav-refresh-spinner" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          <span id="nav-refresh-label">Refresh</span>
+          <span id="nav-refresh-label" class="hidden sm:inline">Refresh</span>
         </button>
 
       </div>
@@ -4386,6 +4386,7 @@
       if (leftPx + tooltipW > rect.width) {
         leftPx = relX - tooltipW - 15;
       }
+      if (leftPx < 8) leftPx = 8;
       let topPx = Math.max(10, Math.min(rect.height - 120, relY - 40));
       tooltip.style.left = `${leftPx}px`;
       tooltip.style.top = `${topPx}px`;
