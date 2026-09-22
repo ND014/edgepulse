@@ -4,12 +4,20 @@ Embedded SQLite storage for user accounts, authentication, sessions, and persona
 """
 
 import hashlib
+import json
+import logging
 import os
 import secrets
 import sqlite3
+import threading
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+logger = logging.getLogger("edgepulse.db")
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 CUSTOM_DB_PATH = os.environ.get("DATABASE_PATH")
@@ -19,6 +27,96 @@ if CUSTOM_DB_PATH:
 else:
     DATA_DIR = ROOT_DIR / "data"
     DB_PATH = DATA_DIR / "edgepulse.db"
+
+GCS_BUCKET = os.environ.get("GCS_DB_BUCKET", "edgepulse-prod-509316_cloudbuild")
+GCS_OBJECT = os.environ.get("GCS_DB_OBJECT", "edgepulse_prod.db")
+_backup_lock = threading.Lock()
+
+
+def _get_gcp_access_token() -> Optional[str]:
+    """Retrieve OAuth2 access token from Google Cloud metadata server if running in GCP."""
+    try:
+        url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
+        req = urllib.request.Request(url, headers={"Metadata-Flavor": "Google"})
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data.get("access_token")
+    except Exception:
+        return None
+    return None
+
+
+def restore_from_gcs() -> bool:
+    """Download edgepulse.db from GCS bucket on container startup if it exists."""
+    token = _get_gcp_access_token()
+    if not token or not GCS_BUCKET:
+        return False
+    try:
+        url = f"https://storage.googleapis.com/storage/v1/b/{GCS_BUCKET}/o/{urllib.parse.quote(GCS_OBJECT, safe='')}?alt=media"
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "User-Agent": "EdgePulse/1.0"})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            if resp.status == 200:
+                DATA_DIR.mkdir(parents=True, exist_ok=True)
+                content = resp.read()
+                if len(content) > 0:
+                    with open(DB_PATH, "wb") as f:
+                        f.write(content)
+                    print(f"[EdgePulse DB] Successfully restored database from gs://{GCS_BUCKET}/{GCS_OBJECT} ({len(content)} bytes)")
+                    return True
+    except urllib.error.HTTPError as he:
+        if he.code == 404:
+            print(f"[EdgePulse DB] No existing database found at gs://{GCS_BUCKET}/{GCS_OBJECT}. Starting fresh.")
+        else:
+            print(f"[EdgePulse DB] GCS restore HTTP {he.code}: {he.reason}")
+    except Exception as e:
+        print(f"[EdgePulse DB] Could not restore database from GCS: {e}")
+    return False
+
+
+def _backup_worker():
+    token = _get_gcp_access_token()
+    if not token or not GCS_BUCKET or not DB_PATH.exists():
+        return
+    try:
+        try:
+            conn = sqlite3.connect(DB_PATH, timeout=5.0)
+            conn.execute("PRAGMA wal_checkpoint(PASSIVE);")
+            conn.close()
+        except Exception:
+            pass
+
+        with open(DB_PATH, "rb") as f:
+            data = f.read()
+
+        if len(data) == 0:
+            return
+
+        url = f"https://storage.googleapis.com/upload/storage/v1/b/{GCS_BUCKET}/o?uploadType=media&name={urllib.parse.quote(GCS_OBJECT, safe='')}"
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/x-sqlite3",
+                "User-Agent": "EdgePulse/1.0",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status in (200, 201):
+                print(f"[EdgePulse DB] Successfully backed up database to gs://{GCS_BUCKET}/{GCS_OBJECT} ({len(data)} bytes)")
+    except Exception as e:
+        print(f"[EdgePulse DB] GCS backup failed: {e}")
+
+
+def trigger_gcs_backup(delay_seconds: float = 1.0):
+    """Trigger an asynchronous, debounced backup of the database to GCS."""
+    def run():
+        time.sleep(delay_seconds)
+        with _backup_lock:
+            _backup_worker()
+    threading.Thread(target=run, daemon=True).start()
 
 
 def get_connection() -> sqlite3.Connection:
@@ -33,6 +131,7 @@ def get_connection() -> sqlite3.Connection:
 
 def init_db():
     """Create database tables and indexes if they do not already exist."""
+    restore_from_gcs()
     conn = get_connection()
     try:
         with conn:
@@ -209,6 +308,7 @@ def create_user(
                 ),
             )
             user_id = cursor.lastrowid
+        trigger_gcs_backup()
         return get_user_by_id(user_id)
     finally:
         conn.close()
@@ -296,6 +396,7 @@ def upsert_google_user(
                     """,
                     (google_sub, now, avatar_url, name, row_email["id"]),
                 )
+            trigger_gcs_backup()
             return get_user_by_id(row_email["id"])
 
         # Insert brand new Google user
@@ -341,6 +442,7 @@ def create_session(
                 "INSERT INTO sessions (token, user_id, remember_me, created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
                 (token, user_id, 1 if remember_me else 0, now, expires_at),
             )
+        trigger_gcs_backup()
         return token
     finally:
         conn.close()
@@ -382,6 +484,8 @@ def delete_session(token: str) -> bool:
     try:
         with conn:
             cursor = conn.execute("DELETE FROM sessions WHERE token = ?", (token,))
+            if cursor.rowcount > 0:
+                trigger_gcs_backup()
             return cursor.rowcount > 0
     finally:
         conn.close()
@@ -467,6 +571,7 @@ def update_user_settings(user_id: int, settings: Dict[str, Any]) -> Optional[Dic
                 f"UPDATE users SET {', '.join(fields)} WHERE id = ?",
                 values,
             )
+        trigger_gcs_backup()
         return get_user_by_id(user_id)
     finally:
         conn.close()
@@ -525,6 +630,7 @@ def update_user_profile(
                     f"UPDATE users SET {', '.join(fields)} WHERE id = ?",
                     values,
                 )
+            trigger_gcs_backup()
 
         return get_user_by_id(user_id)
     finally:
@@ -574,6 +680,7 @@ def log_bet(
             )
             bet_id = cursor.lastrowid
 
+        trigger_gcs_backup()
         row = conn.execute("SELECT * FROM bets WHERE id = ?", (bet_id,)).fetchone()
         return dict(row)
     finally:
@@ -660,6 +767,7 @@ def settle_bet(
                 (status_clean, payout, profit, settled_at, bet_id, user_id),
             )
 
+        trigger_gcs_backup()
         updated_row = conn.execute("SELECT * FROM bets WHERE id = ?", (bet_id,)).fetchone()
         d = dict(updated_row)
         d["matchup"] = d.get("event_name") or ""
@@ -678,6 +786,8 @@ def delete_bet(bet_id: int, user_id: int) -> bool:
     try:
         with conn:
             cursor = conn.execute("DELETE FROM bets WHERE id = ? AND user_id = ?", (bet_id, user_id))
+            if cursor.rowcount > 0:
+                trigger_gcs_backup()
             return cursor.rowcount > 0
     finally:
         conn.close()

@@ -892,6 +892,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
                 # Demo / Local Testing fallback
                 if credential == "demo_google_token" or not credential:
+                    if GOOGLE_CLIENT_ID:
+                        send_json_response(self, {"status": "error", "message": "Demo authentication is disabled in production. Please sign in with your Google account or email & password."}, 400)
+                        return
                     sub = f"google_demo_{int(time.time() * 1000)}"
                     email = data.get("email", f"demo.google.user{int(time.time()) % 1000}@gmail.com")
                     name = data.get("name", "Demo Google Bettor")

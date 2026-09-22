@@ -233,6 +233,15 @@ class TestDatabaseAuth(unittest.TestCase):
         self.assertEqual(logs[0]["user_email"], "fan@epl.com")
         self.assertIn("UTC", logs[0]["formatted_time"])
 
+    def test_gcs_helpers(self):
+        # Should gracefully return False without raising an error outside GCP
+        restored = db.restore_from_gcs()
+        self.assertFalse(restored)
+
+        # Triggering backup worker should not raise any unhandled exceptions
+        db.trigger_gcs_backup(delay_seconds=0.01)
+        time.sleep(0.05)
+
 
 if __name__ == '__main__':
     unittest.main()

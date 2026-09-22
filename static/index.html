@@ -543,7 +543,7 @@
 
             <!-- Remember Me / Save Login Details -->
             <div class="flex items-start space-x-2.5 p-3 rounded-xl bg-brandDark/70 border border-brandBorder/80 hover:border-slate-600 transition my-2">
-              <input id="auth-remember-me" type="checkbox" class="mt-0.5 w-4 h-4 rounded border-brandBorder bg-brandDark text-neonCyan focus:ring-neonCyan/40 cursor-pointer shrink-0" />
+              <input id="auth-remember-me" type="checkbox" checked class="mt-0.5 w-4 h-4 rounded border-brandBorder bg-brandDark text-neonCyan focus:ring-neonCyan/40 cursor-pointer shrink-0" />
               <label for="auth-remember-me" class="text-xs text-slate-300 select-none cursor-pointer leading-tight">
                 <span class="font-bold text-white flex items-center space-x-1.5">
                   <span>Save login details on this browser</span>
@@ -2194,7 +2194,25 @@
           fetchState();
         } else {
           alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
-          alertEl.innerText = data.message || 'Authentication failed.';
+          if (currentAuthTab === 'login') {
+            alertEl.innerHTML = `
+              <div>${data.message || 'Invalid email or password.'}</div>
+              <div class="mt-2 pt-2 border-t border-rose-800/60 flex items-center justify-between text-[11px]">
+                <span class="text-slate-300">Don't have an account yet?</span>
+                <button type="button" onclick="setAuthTab('signup')" class="text-neonCyan font-bold underline hover:text-white ml-2">Create Account →</button>
+              </div>
+            `;
+          } else if (currentAuthTab === 'signup' && (data.message || '').includes('already exists')) {
+            alertEl.innerHTML = `
+              <div>${data.message}</div>
+              <div class="mt-2 pt-2 border-t border-rose-800/60 flex items-center justify-between text-[11px]">
+                <span class="text-slate-300">Already have an account?</span>
+                <button type="button" onclick="setAuthTab('login')" class="text-neonCyan font-bold underline hover:text-white ml-2">Sign In here →</button>
+              </div>
+            `;
+          } else {
+            alertEl.innerText = data.message || 'Authentication failed.';
+          }
         }
       } catch (err) {
         alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
@@ -2208,11 +2226,18 @@
     async function loginWithGoogle(credential = null) {
       const alertEl = document.getElementById('auth-alert');
       const rememberMe = !!document.getElementById('auth-remember-me')?.checked;
+      if (!credential) {
+        if (alertEl) {
+          alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-amber-950/70 text-amber-300 border border-amber-600/50 block';
+          alertEl.innerText = 'Please click the Google button to choose your account.';
+        }
+        return;
+      }
       try {
         const res = await fetch('/api/auth/google', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credential: credential || 'demo_google_token', remember_me: rememberMe })
+          body: JSON.stringify({ credential, remember_me: rememberMe })
         });
         const data = await res.json();
         if (data.status === 'success') {
@@ -2286,19 +2311,27 @@
     }
 
     function handleGoogleBtnClick() {
+      const alertEl = document.getElementById('auth-alert');
       if (googleClientId && window.google && window.google.accounts && window.google.accounts.id) {
         try {
           window.google.accounts.id.prompt((notification) => {
             if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              console.log('Google One-Tap skipped or not displayed:', notification.getNotDisplayedReason());
-              loginWithGoogle();
+              const reason = notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : 'suppressed';
+              console.log('Google One-Tap skipped or not displayed:', reason);
+              if (alertEl) {
+                alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-sky-950/70 text-sky-300 border border-sky-600/50 block';
+                alertEl.innerText = 'Please tap the Google Sign-In button to choose your account.';
+              }
             }
           });
         } catch (e) {
-          loginWithGoogle();
+          console.warn('Google prompt exception:', e);
         }
       } else {
-        loginWithGoogle();
+        if (alertEl) {
+          alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-amber-950/70 text-amber-300 border border-amber-600/50 block';
+          alertEl.innerText = 'Google Sign-In is loading. Please tap again in a moment or use Email & Password.';
+        }
       }
     }
 
