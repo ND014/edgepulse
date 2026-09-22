@@ -67,8 +67,9 @@ gcloud artifacts repositories create "${REPO_NAME}" \
 # 4. Build and push image using Google Cloud Build with the dedicated service account
 echo "[4/5] Submitting build to Google Cloud Build using ${BUILDER_SA}..."
 gcloud builds submit \
-  --service-account="projects/${PROJECT_ID}/serviceAccounts/${BUILDER_SA}" \
-  --tag="${FULL_IMAGE}" .
+  --config=cloudbuild.yaml \
+  --substitutions=_IMAGE="${FULL_IMAGE}" \
+  --service-account="projects/${PROJECT_ID}/serviceAccounts/${BUILDER_SA}" .
 
 # 5. Deploy container to Cloud Run with dedicated service account for storage access
 echo "[5/5] Deploying container to Cloud Run..."
