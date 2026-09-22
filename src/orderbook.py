@@ -74,6 +74,7 @@ class OrderBook:
                     fair_decimal_b=fair_dec_b,
                     timestamp=quote.timestamp or time.time(),
                     commence_time=quote.commence_time,
+                    format_title=quote.format_title,
                 )
                 self._consensus[event_id] = consensus
                 self.total_consensus_updates += 1

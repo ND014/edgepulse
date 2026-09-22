@@ -44,6 +44,7 @@ class OddsQuote:
     odds_format: OddsFormat = OddsFormat.AMERICAN
     timestamp: float = 0.0
     commence_time: str = ""
+    format_title: str = ""
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,7 @@ class NormalizedQuote:
     overround: float
     timestamp: float
     commence_time: str = ""
+    format_title: str = ""
 
 
 @dataclass(frozen=True)
@@ -81,6 +83,7 @@ class DeviggedConsensus:
     fair_decimal_b: float
     timestamp: float
     commence_time: str = ""
+    format_title: str = ""
 
 
 @dataclass(frozen=True)
@@ -99,11 +102,13 @@ class AnomalyAlert:
     expected_value: float     # (P_true * soft_decimal) - 1.0
     timestamp: float
     commence_time: str = ""
+    format_title: str = ""
 
     def to_dict(self) -> dict:
         return {
             "event_id": self.event_id,
             "sport": self.sport.value,
+            "format_title": self.format_title,
             "target_book": self.target_book,
             "sharp_book": self.sharp_book,
             "selection": self.selection_name,

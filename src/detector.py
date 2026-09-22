@@ -86,6 +86,7 @@ class AnomalyDetector:
                     expected_value=round(ev_a, 5),
                     timestamp=now,
                     commence_time=quote.commence_time or consensus.commence_time,
+                    format_title=quote.format_title or consensus.format_title,
                 )
                 alerts.append(alert_a)
                 self.total_anomalies_detected += 1
@@ -111,6 +112,7 @@ class AnomalyDetector:
                     expected_value=round(ev_b, 5),
                     timestamp=now,
                     commence_time=quote.commence_time or consensus.commence_time,
+                    format_title=quote.format_title or consensus.format_title,
                 )
                 alerts.append(alert_b)
                 self.total_anomalies_detected += 1

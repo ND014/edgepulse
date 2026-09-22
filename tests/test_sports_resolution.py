@@ -102,6 +102,55 @@ class TestSportsResolution(unittest.TestCase):
         self.assertEqual(web_app.sport_key_to_enum("cricket_international_t20"), web_app.Sport.CRICKET_T20)
         self.assertEqual(web_app.sport_key_to_enum("tennis_wta_singapore_open"), web_app.Sport.TENNIS)
 
+    def test_resolve_format_title(self):
+        # Cricket
+        self.assertEqual(web_app.resolve_format_title("cricket_odi", "One Day Internationals"), "ODI")
+        self.assertEqual(web_app.resolve_format_title("cricket_international_t20", "International Twenty20"), "T20")
+        self.assertEqual(web_app.resolve_format_title("cricket_caribbean_premier_league", "CPL"), "CPL (T20)")
+        self.assertEqual(web_app.resolve_format_title("cricket_ipl", "Indian Premier League"), "IPL (T20)")
+        # Football
+        self.assertEqual(web_app.resolve_format_title("americanfootball_nfl", "NFL"), "NFL")
+        self.assertEqual(web_app.resolve_format_title("americanfootball_ncaaf", "NCAA Football"), "NCAAF")
+        # Hockey & Basketball
+        self.assertEqual(web_app.resolve_format_title("icehockey_nhl", "NHL"), "NHL")
+        self.assertEqual(web_app.resolve_format_title("basketball_nba", "NBA"), "NBA")
+        # Soccer
+        self.assertEqual(web_app.resolve_format_title("soccer_epl", "Premier League"), "EPL")
+        self.assertEqual(web_app.resolve_format_title("soccer_usa_mls", "MLS"), "MLS")
+        self.assertEqual(web_app.resolve_format_title("soccer_spain_la_liga", "La Liga"), "La Liga")
+        # Tennis
+        self.assertEqual(web_app.resolve_format_title("tennis_wta_singapore_open", "WTA Singapore Open"), "WTA Singapore Open")
+
+    def test_event_id_format_separation(self):
+        from src.normalizer import generate_canonical_event_id
+        from src.models import Sport
+        odi_id = generate_canonical_event_id(Sport.CRICKET_T20, "India", "West Indies", "ODI")
+        t20_id = generate_canonical_event_id(Sport.CRICKET_T20, "India", "West Indies", "T20")
+        self.assertNotEqual(odi_id, t20_id)
+        self.assertIn("odi", odi_id.lower())
+        self.assertIn("t20", t20_id.lower())
+
+    def test_cricket_coexistence_odi_and_t20(self):
+        # Verify both India vs WI ODI and T20 exist simultaneously in cricket cache
+        web_app.load_cached_odds("cricket_t20")
+        eids = web_app.orderbook.get_all_active_event_ids()
+        odi_events = [eid for eid in eids if "india" in eid.lower() and ":odi:" in eid.lower()]
+        t20_events = [eid for eid in eids if "india" in eid.lower() and ":t20:" in eid.lower()]
+        self.assertEqual(len(odi_events), 1)
+        self.assertEqual(len(t20_events), 1)
+
+        # Check format title on consensus and quotes
+        odi_quotes = web_app.orderbook.get_quotes(odi_events[0])
+        t20_quotes = web_app.orderbook.get_quotes(t20_events[0])
+        first_odi = next(iter(odi_quotes.values()))
+        first_t20 = next(iter(t20_quotes.values()))
+        self.assertEqual(first_odi.format_title, "ODI")
+        self.assertEqual(first_t20.format_title, "T20")
+
+        # Verify alerts contain format_title
+        alert_formats = {a.get("format_title") for a in web_app.detected_anomalies if "India" in a.get("event_id", "")}
+        self.assertIn("ODI", alert_formats)
+
 
 if __name__ == "__main__":
     unittest.main()

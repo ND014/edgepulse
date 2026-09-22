@@ -212,6 +212,96 @@ SPORT_API_MAP = {
 }
 
 
+def resolve_format_title(sport_key: str = "", sport_title: str = "") -> str:
+    """
+    Resolve concise, standardized match format / tournament label across all sports.
+    E.g., 'ODI', 'T20', 'IPL (T20)', 'NFL', 'NCAAF', 'NBA', 'NHL', 'EPL', 'MLS', 'WTA Singapore Open'.
+    """
+    s_key = (sport_key or "").lower().strip()
+    s_title = (sport_title or "").strip()
+    title_lower = s_title.lower()
+
+    # Cricket formats
+    if "one day international" in title_lower or "cricket_odi" in s_key or title_lower == "odi":
+        return "ODI"
+    if "cpl" in s_key or "caribbean" in title_lower or title_lower == "cpl":
+        return "CPL (T20)"
+    if "ipl" in s_key or "indian premier league" in title_lower or title_lower == "ipl":
+        return "IPL (T20)"
+    if "big bash" in title_lower or "bbl" in s_key or title_lower == "bbl":
+        return "BBL (T20)"
+    if "psl" in title_lower or "psl" in s_key or title_lower == "psl":
+        return "PSL (T20)"
+    if "hundred" in title_lower or "the_hundred" in s_key:
+        return "The Hundred"
+    if "twenty20" in title_lower or "t20" in title_lower or "cricket_international_t20" in s_key:
+        return "T20"
+
+    # Basketball formats
+    if "nba" in s_key or "nba" in title_lower:
+        return "WNBA" if ("wnba" in s_key or "wnba" in title_lower) else "NBA"
+    if "euroleague" in s_key or "euroleague" in title_lower:
+        return "EuroLeague"
+    if "nbl" in s_key or "nbl" in title_lower:
+        return "NBL"
+
+    # American Football
+    if "nfl" in s_key or "nfl" in title_lower:
+        return "NFL"
+    if "ncaaf" in s_key or "ncaa" in title_lower or "college" in title_lower:
+        return "NCAAF"
+
+    # Ice Hockey
+    if "nhl" in s_key or "nhl" in title_lower:
+        return "NHL"
+
+    # Baseball
+    if "mlb" in s_key or "mlb" in title_lower or "major league baseball" in title_lower:
+        return "MLB"
+    if "npb" in s_key or "npb" in title_lower:
+        return "NPB"
+    if "kbo" in s_key or "kbo" in title_lower:
+        return "KBO"
+
+    # Soccer Leagues
+    if "mls" in s_key or "mls" in title_lower or "major league soccer" in title_lower:
+        return "MLS"
+    if "epl" in s_key or "premier league" in title_lower:
+        return "EPL"
+    if "la_liga" in s_key or "la liga" in title_lower:
+        return "La Liga"
+    if "bundesliga" in s_key or "bundesliga" in title_lower:
+        return "Bundesliga"
+    if "serie_a" in s_key or "serie a" in title_lower:
+        return "Serie A"
+    if "ligue_one" in s_key or "ligue 1" in title_lower:
+        return "Ligue 1"
+    if "uefa_champs" in s_key or "champions league" in title_lower:
+        return "UEFA Champions League"
+    if "europa" in s_key or "europa" in title_lower:
+        return "UEFA Europa League"
+
+    # Tennis
+    if "wta" in s_key or "wta" in title_lower:
+        if s_title and len(s_title) > 3:
+            return s_title
+        return "WTA"
+    if "atp" in s_key or "atp" in title_lower:
+        if s_title and len(s_title) > 3:
+            return s_title
+        return "ATP"
+
+    # Combat Sports
+    if "mma" in s_key or "ufc" in s_key or "mixed martial arts" in title_lower:
+        return "UFC / MMA"
+    if "boxing" in s_key or "boxing" in title_lower:
+        return "Boxing"
+
+    if s_title:
+        return s_title
+    return ""
+
+
 def record_alert(alert, is_live=False):
     global max_edge_found
     settings = load_settings()
@@ -510,6 +600,8 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
     for match in combined_matches:
         commence_time = match.get("commence_time", "")
         m_sport_key = match.get("sport_key", "")
+        m_sport_title = match.get("sport_title", "")
+        fmt_title = resolve_format_title(m_sport_key, m_sport_title)
         m_enum = sport_key_to_enum(m_sport_key) if m_sport_key else sport_enum
 
         # STRICT USER RULE: Exclude test cricket matches
@@ -538,6 +630,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                             odds_format=OddsFormat.AMERICAN,
                             timestamp=time.time(),
                             commence_time=commence_time,
+                            format_title=fmt_title,
                         )
                         process_quote(q, is_live=True)
                         total_fetched += 1
@@ -570,6 +663,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                                             odds_format=OddsFormat.AMERICAN,
                                             timestamp=time.time(),
                                             commence_time=commence_time,
+                                            format_title=fmt_title,
                                         )
                                         process_quote(q, is_live=True)
                                         total_fetched += 1
@@ -661,6 +755,8 @@ def load_cached_odds(target_filter="all"):
                 for match in data:
                     commence_time = match.get("commence_time", "")
                     m_sport_key = match.get("sport_key", "")
+                    m_sport_title = match.get("sport_title", "")
+                    fmt_title = resolve_format_title(m_sport_key, m_sport_title)
                     m_enum = sport_key_to_enum(m_sport_key) if m_sport_key else s_enum
 
                     # STRICT RULE: Exclude test cricket matches
@@ -689,6 +785,7 @@ def load_cached_odds(target_filter="all"):
                                         odds_format=OddsFormat.AMERICAN,
                                         timestamp=time.time(),
                                         commence_time=commence_time,
+                                        format_title=fmt_title,
                                     )
                                     process_quote(q, is_live=False)
                                     total_ingested += 1
@@ -721,6 +818,7 @@ def load_cached_odds(target_filter="all"):
                                                         odds_format=OddsFormat.AMERICAN,
                                                         timestamp=time.time(),
                                                         commence_time=commence_time,
+                                                        format_title=fmt_title,
                                                     )
                                                     process_quote(q, is_live=False)
                                                     total_ingested += 1
@@ -774,6 +872,10 @@ def load_cached_odds(target_filter="all"):
 
         for match in data:
             commence_time = match.get("commence_time", "")
+            m_sport_key = match.get("sport_key", "")
+            m_sport_title = match.get("sport_title", "")
+            fmt_title = resolve_format_title(m_sport_key, m_sport_title)
+
             # STRICT USER RULE: Exclude test cricket matches
             if sport_enum == Sport.CRICKET_T20:
                 ht = match.get("home_team", "").lower()
@@ -800,6 +902,7 @@ def load_cached_odds(target_filter="all"):
                                 odds_format=OddsFormat.AMERICAN,
                                 timestamp=time.time(),
                                 commence_time=commence_time,
+                                format_title=fmt_title,
                             )
                             process_quote(q, is_live=True)
                         elif len(outcomes) == 3 and sport_enum == Sport.SOCCER_DNB:
@@ -832,6 +935,7 @@ def load_cached_odds(target_filter="all"):
                                                 odds_format=OddsFormat.AMERICAN,
                                                 timestamp=time.time(),
                                                 commence_time=commence_time,
+                                                format_title=fmt_title,
                                             )
                                             process_quote(q, is_live=True)
                                 except Exception:
@@ -1054,6 +1158,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                         events_list.append({
                             "event_id": eid,
                             "sport": first_q.sport.value,
+                            "format_title": first_q.format_title or (consensus.format_title if consensus else ""),
                             "side_a": first_q.side_a,
                             "side_b": first_q.side_b,
                             "commence_time": first_q.commence_time,

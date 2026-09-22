@@ -64,6 +64,7 @@ def find_arbitrage_opportunities(
         event_id = event.get("event_id", "")
         sport = event.get("sport", "")
         commence_time = event.get("commence_time", "")
+        format_title = event.get("format_title", "")
 
         # Find best decimal odds for Side A and Side B within regional filter
         best_a_book = None
@@ -107,6 +108,7 @@ def find_arbitrage_opportunities(
                 opportunities.append({
                     "event_id": event_id,
                     "sport": sport,
+                    "format_title": format_title,
                     "event_name": f"{side_a_name} vs {side_b_name}",
                     "commence_time": commence_time,
                     "side_a": side_a_name,

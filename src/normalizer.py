@@ -166,12 +166,15 @@ def resolve_entity(name: str) -> str:
     return name.strip()
 
 
-def generate_canonical_event_id(sport: Sport, side_a: str, side_b: str) -> str:
+def generate_canonical_event_id(sport: Sport, side_a: str, side_b: str, format_title: str = "") -> str:
     """Generate a deterministic, order-independent event identifier."""
     norm_a = resolve_entity(side_a)
     norm_b = resolve_entity(side_b)
     # Sort lexicographically to guarantee same ID regardless of home/away flipping
     sides = sorted([norm_a, norm_b])
+    if format_title:
+        fmt_slug = format_title.lower().replace(" ", "_").replace("/", "_").replace("-", "_")
+        return f"{sport.value}:{fmt_slug}:{sides[0]}_vs_{sides[1]}"
     return f"{sport.value}:{sides[0]}_vs_{sides[1]}"
 
 
@@ -183,7 +186,7 @@ def normalize_quote(quote: OddsQuote) -> NormalizedQuote:
     # 1. Resolve canonical names
     canonical_a = resolve_entity(quote.side_a)
     canonical_b = resolve_entity(quote.side_b)
-    canonical_id = quote.event_id or generate_canonical_event_id(quote.sport, canonical_a, canonical_b)
+    canonical_id = quote.event_id or generate_canonical_event_id(quote.sport, canonical_a, canonical_b, quote.format_title)
 
     # 2. Convert odds
     if quote.odds_format == OddsFormat.AMERICAN:
@@ -221,4 +224,5 @@ def normalize_quote(quote: OddsQuote) -> NormalizedQuote:
         overround=round(overround, 5),
         timestamp=quote.timestamp,
         commence_time=quote.commence_time,
+        format_title=quote.format_title,
     )

@@ -2652,16 +2652,46 @@
     function formatSportDisplay(sport) {
       if (!sport) return 'UNKNOWN';
       const s = String(sport).toLowerCase();
-      if (s.includes('cricket')) return 'CRICKET (ODI/T20)';
-      if (s.includes('americanfootball') || s.includes('nfl')) return 'NFL FOOTBALL';
-      if (s.includes('icehockey') || s.includes('nhl') || s.includes('hockey')) return 'NHL HOCKEY';
+      if (s.includes('cricket')) return 'CRICKET';
+      if (s.includes('americanfootball') || s.includes('nfl')) return 'FOOTBALL';
+      if (s.includes('icehockey') || s.includes('nhl') || s.includes('hockey')) return 'HOCKEY';
       if (s.includes('soccer')) return 'SOCCER';
-      if (s.includes('basketball')) return 'BASKETBALL (NBA)';
+      if (s.includes('basketball')) return 'BASKETBALL';
       if (s.includes('tennis')) return 'TENNIS';
-      if (s.includes('baseball')) return 'BASEBALL (MLB)';
+      if (s.includes('baseball')) return 'BASEBALL';
       if (s.includes('ufc') || s.includes('mma')) return 'UFC / MMA';
       if (s.includes('boxing')) return 'BOXING';
       return sport.toUpperCase();
+    }
+
+    function getFormatBadge(formatTitle, sport) {
+      if (!formatTitle) return '';
+      const fmt = String(formatTitle).trim();
+      if (!fmt) return '';
+      const lower = fmt.toLowerCase();
+      let badgeColors = 'bg-sky-500/20 text-sky-300 border-sky-500/40'; // default
+      
+      if (lower.includes('odi')) {
+        badgeColors = 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-sm';
+      } else if (lower.includes('t20') || lower.includes('cpl') || lower.includes('ipl') || lower.includes('bbl') || lower.includes('psl')) {
+        badgeColors = 'bg-purple-500/25 text-purple-300 border-purple-500/50 shadow-sm';
+      } else if (lower.includes('hundred')) {
+        badgeColors = 'bg-fuchsia-500/25 text-fuchsia-300 border-fuchsia-500/50 shadow-sm';
+      } else if (lower.includes('nfl') || lower.includes('ncaaf')) {
+        badgeColors = 'bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm';
+      } else if (lower.includes('nhl')) {
+        badgeColors = 'bg-cyan-500/25 text-cyan-300 border-cyan-500/50 shadow-sm';
+      } else if (lower.includes('wta') || lower.includes('atp')) {
+        badgeColors = 'bg-rose-500/25 text-rose-300 border-rose-500/50 shadow-sm';
+      } else if (lower.includes('epl') || lower.includes('mls') || lower.includes('la liga') || lower.includes('bundesliga') || lower.includes('serie a') || lower.includes('ligue 1') || lower.includes('champions league') || lower.includes('europa')) {
+        badgeColors = 'bg-teal-500/25 text-teal-300 border-teal-500/50 shadow-sm';
+      } else if (lower.includes('nba') || lower.includes('wnba') || lower.includes('basketball')) {
+        badgeColors = 'bg-orange-500/25 text-orange-300 border-orange-500/50 shadow-sm';
+      } else if (lower.includes('mlb') || lower.includes('npb') || lower.includes('kbo')) {
+        badgeColors = 'bg-blue-500/25 text-blue-300 border-blue-500/50 shadow-sm';
+      }
+
+      return `<span class="text-[10px] font-mono px-2 py-0.5 rounded font-extrabold border tracking-wider uppercase ${badgeColors}">${fmt}</span>`;
     }
 
     let currentLiveSportKey = '';
@@ -4069,7 +4099,7 @@
           }
         }
         if (searchQuery) {
-          const s = `${arb.event_name} ${arb.side_a} ${arb.side_b} ${arb.book_a} ${arb.book_b} ${arb.sport}`.toLowerCase();
+          const s = `${arb.event_name} ${arb.side_a} ${arb.side_b} ${arb.book_a} ${arb.book_b} ${arb.sport} ${arb.format_title || ''}`.toLowerCase();
           if (!s.includes(searchQuery)) return false;
         }
         return true;
@@ -4115,6 +4145,7 @@
               <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center space-x-1.5">
                   <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-slate-200 font-bold">${formatSportDisplay(arb.sport)}</span>
+                  ${getFormatBadge(arb.format_title, arb.sport)}
                   <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-neonYellow/20 text-neonYellow border border-neonYellow/40 font-bold">ZERO RISK</span>
                 </div>
                 <div class="text-xs font-mono font-extrabold text-neonGreen bg-neonGreen/10 border border-neonGreen/40 px-2.5 py-1 rounded-lg">
@@ -4124,7 +4155,7 @@
 
               <!-- Match Title & Date -->
               <div class="mb-3">
-                <div class="text-sm font-bold text-white truncate" title="${arb.event_name}">${arb.event_name}</div>
+                <div class="text-sm font-bold text-white truncate" title="${arb.event_name}${arb.format_title ? ` (${arb.format_title})` : ''}">${arb.event_name} ${arb.format_title ? `<span class="text-xs font-mono font-semibold text-slate-400">(${arb.format_title})</span>` : ''}</div>
                 <div class="text-[11px] font-mono text-slate-400 mt-0.5">
                   <span>${eventDate.formatted}</span>
                   <span class="text-slate-600">&middot;</span>
@@ -4366,8 +4397,8 @@
       if (!a) return;
 
       currentTrackingAnomaly = a;
-      const displayMatch = (a.event_id || '')
-        .replace(/^[^:]+:/, '')
+      const rawMatch = (a.event_id || '').split(':').pop() || '';
+      const displayMatch = rawMatch
         .replace(/_vs_/g, ' vs ')
         .replace(/_/g, ' ');
 
@@ -4382,7 +4413,8 @@
       const kellyMult = parseFloat(document.getElementById('select-kelly')?.value) || 0.25;
       const kelly = calcKelly(pTrue, softDec, bankroll, kellyMult);
 
-      document.getElementById('modal-track-event').innerText = displayMatch;
+      const fmtBadge = a.format_title ? ` [${a.format_title}]` : '';
+      document.getElementById('modal-track-event').innerText = `${displayMatch}${fmtBadge}`;
       document.getElementById('modal-track-pick').innerText = `Pick: ${a.selection}`;
       document.getElementById('modal-track-book').innerText = a.target_book.toUpperCase();
       document.getElementById('modal-track-odds').innerText = `${softDec} (${a.soft_american || ''})`;
@@ -4410,10 +4442,11 @@
       const notesVal = document.getElementById('modal-track-notes')?.value || '';
 
       const a = currentTrackingAnomaly;
-      const displayMatch = (a.event_id || '')
-        .replace(/^[^:]+:/, '')
+      const rawMatch = (a.event_id || '').split(':').pop() || '';
+      const displayMatch = rawMatch
         .replace(/_vs_/g, ' vs ')
         .replace(/_/g, ' ');
+      const matchWithFormat = a.format_title ? `${displayMatch} [${a.format_title}]` : displayMatch;
       const softDec = parseFloat(a.soft_decimal) || 2.0;
 
       if (btn) btn.disabled = true;
@@ -4422,7 +4455,7 @@
         const payload = {
           event_id: a.event_id,
           sport: a.sport,
-          matchup: displayMatch,
+          matchup: matchWithFormat,
           selection: a.selection,
           bookmaker: a.target_book,
           odds_decimal: softDec,
@@ -5142,7 +5175,7 @@
       }
       if (searchQuery) {
         anomalies = anomalies.filter(a => {
-          const matchStr = `${a.selection} ${a.target_book} ${a.event_id} ${a.sport}`.toLowerCase();
+          const matchStr = `${a.selection} ${a.target_book} ${a.event_id} ${a.sport} ${a.format_title || ''}`.toLowerCase();
           return matchStr.includes(searchQuery);
         });
       }
@@ -5230,8 +5263,8 @@
           const softDec = parseFloat(a.soft_decimal) || 2.0;
           const kelly = calcKelly(pTrue, softDec, bankroll, kellyMult);
 
-          const displayMatch = (a.event_id || '')
-            .replace(/^[^:]+:/, '')
+          const rawMatch = (a.event_id || '').split(':').pop() || '';
+          const displayMatch = rawMatch
             .replace(/_vs_/g, ' vs ')
             .replace(/_/g, ' ');
 
@@ -5239,7 +5272,8 @@
           const sharpName = (a.sharp_book || 'Pinnacle').toUpperCase();
           const bookUrl = getSportsbookUrl(a.target_book);
 
-          const copyString = `Bet ${a.selection} on ${a.target_book.toUpperCase()} at ${a.soft_american} - Stake: $${kelly.stake.toFixed(2)}`;
+          const fmtTag = a.format_title ? ` [${a.format_title}]` : '';
+          const copyString = `Bet ${a.selection} on ${a.target_book.toUpperCase()} at ${a.soft_american}${fmtTag} - Stake: $${kelly.stake.toFixed(2)}`;
           const bookCount = eventBookCountMap[a.event_id] || 0;
 
           return `
@@ -5249,6 +5283,7 @@
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center space-x-1.5">
                     <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-slate-300 font-bold tracking-wider">${formatSportDisplay(a.sport)}</span>
+                    ${getFormatBadge(a.format_title, a.sport)}
                     ${bookCount > 0 ? `<span class="text-[10px] font-mono text-slate-400">${bookCount} books</span>` : ''}
                   </div>
                   <span class="text-xs font-mono font-bold text-neonGreen bg-neonGreen/10 border border-neonGreen/30 px-2.5 py-0.5 rounded-lg shadow-sm">${a.expected_value} EV</span>
@@ -5256,7 +5291,7 @@
 
                 <!-- Matchup Title & Event Date/Time -->
                 <div class="mb-3">
-                  <div class="text-sm font-bold text-white truncate" title="${displayMatch}">${displayMatch}</div>
+                  <div class="text-sm font-bold text-white truncate" title="${displayMatch}${a.format_title ? ` (${a.format_title})` : ''}">${displayMatch} ${a.format_title ? `<span class="text-xs font-mono font-semibold text-slate-400">(${a.format_title})</span>` : ''}</div>
                   <div class="text-[11px] font-mono text-slate-400 mt-0.5">
                     <span>${eventDate.formatted}</span>
                     <span class="mx-1 text-slate-600">&middot;</span>
@@ -5328,7 +5363,7 @@
       if (searchQuery) {
         events = events.filter(e => {
           const books = Object.keys(e.quotes || {}).join(' ');
-          const matchStr = `${e.side_a} ${e.side_b} ${e.sport} ${e.event_id} ${books}`.toLowerCase();
+          const matchStr = `${e.side_a} ${e.side_b} ${e.sport} ${e.event_id} ${e.format_title || ''} ${books}`.toLowerCase();
           return matchStr.includes(searchQuery);
         });
       }
@@ -5388,6 +5423,7 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-brandBorder/60 gap-2">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-neonCyan font-bold">${formatSportDisplay(e.sport)}</span>
+                  ${getFormatBadge(e.format_title, e.sport)}
                   <span class="text-sm font-bold text-white">${e.side_a} <span class="text-slate-500 font-normal">vs</span> ${e.side_b}</span>
                   <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${badgeClass} font-bold">${bookCount} Books ${currentSelectedRegion !== 'all' ? `(${getRegionShortName(currentSelectedRegion)})` : 'Quoting'}</span>
                   ${eventDate.formatted !== 'Time TBD' ? `
