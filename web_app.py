@@ -1121,21 +1121,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
             send_json_response(self, {"status": "success", "users": users, "count": len(users)})
             return
 
-        elif self.path.startswith("/api/admin/clear_users"):
-            secret_provided = False
-            if "?" in self.path:
-                query = self.path.split("?", 1)[1]
-                for p in query.split("&"):
-                    if p.startswith("secret=") and p.split("=", 1)[1] == "edgepulse_wipe_2026":
-                        secret_provided = True
-            user = get_current_user_from_request(self)
-            is_admin_user = user and (user.get("email") or "").strip().lower() == "nitdhans1414@gmail.com"
-            if not secret_provided and not is_admin_user:
-                send_json_response(self, {"status": "error", "message": "Unauthorized. Provide valid admin secret or log in as nitdhans1414@gmail.com."}, 403)
-                return
-            count = db.clear_all_users()
-            send_json_response(self, {"status": "success", "message": f"All user data successfully wiped ({count} users removed). Synced to GCS.", "cleared_count": count})
-            return
 
         elif self.path == "/api/state":
             user = get_current_user_from_request(self)
@@ -1276,6 +1261,14 @@ class DashboardHandler(BaseHTTPRequestHandler):
         global current_active_sport_name, current_active_sport_filter, current_active_sport_key
 
         if self.path.startswith("/api/admin/clear_users"):
+            # Enforce safeguard: database wiping is disabled to permanently preserve SQLite data
+            if os.environ.get("ALLOW_USER_WIPE") != "1":
+                send_json_response(self, {
+                    "status": "error",
+                    "message": "Database wiping is disabled. SQLite user data is permanently preserved."
+                }, 403)
+                return
+
             secret_provided = False
             if self.headers.get("X-Admin-Key") == "edgepulse_wipe_2026":
                 secret_provided = True

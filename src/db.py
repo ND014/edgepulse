@@ -30,6 +30,12 @@ else:
 
 GCS_BUCKET = os.environ.get("GCS_DB_BUCKET", "edgepulse-prod-509316_cloudbuild")
 GCS_OBJECT = os.environ.get("GCS_DB_OBJECT", "edgepulse_prod.db")
+GCS_FALLBACK_BUCKETS = [
+    GCS_BUCKET,
+    "edgepulse-prod-509316-db",
+    "edgepulse-prod-509316",
+    "edgepulse-prod-509316.appspot.com",
+]
 _backup_lock = threading.Lock()
 
 
@@ -50,33 +56,42 @@ def _get_gcp_access_token() -> Optional[str]:
 def restore_from_gcs() -> bool:
     """Download edgepulse.db from GCS bucket on container startup if it exists."""
     token = _get_gcp_access_token()
-    if not token or not GCS_BUCKET:
+    if not token:
+        if DB_PATH.exists() and DB_PATH.stat().st_size > 0:
+            print(f"[EdgePulse DB] Local database active at {DB_PATH} ({DB_PATH.stat().st_size} bytes)")
         return False
-    try:
-        url = f"https://storage.googleapis.com/storage/v1/b/{GCS_BUCKET}/o/{urllib.parse.quote(GCS_OBJECT, safe='')}?alt=media"
-        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "User-Agent": "EdgePulse/1.0"})
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            if resp.status == 200:
-                DATA_DIR.mkdir(parents=True, exist_ok=True)
-                content = resp.read()
-                if len(content) > 0:
-                    with open(DB_PATH, "wb") as f:
-                        f.write(content)
-                    print(f"[EdgePulse DB] Successfully restored database from gs://{GCS_BUCKET}/{GCS_OBJECT} ({len(content)} bytes)")
-                    return True
-    except urllib.error.HTTPError as he:
-        if he.code == 404:
-            print(f"[EdgePulse DB] No existing database found at gs://{GCS_BUCKET}/{GCS_OBJECT}. Starting fresh.")
-        else:
-            print(f"[EdgePulse DB] GCS restore HTTP {he.code}: {he.reason}")
-    except Exception as e:
-        print(f"[EdgePulse DB] Could not restore database from GCS: {e}")
+
+    for bucket in GCS_FALLBACK_BUCKETS:
+        if not bucket:
+            continue
+        try:
+            url = f"https://storage.googleapis.com/storage/v1/b/{bucket}/o/{urllib.parse.quote(GCS_OBJECT, safe='')}?alt=media"
+            req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "User-Agent": "EdgePulse/1.0"})
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                if resp.status == 200:
+                    DATA_DIR.mkdir(parents=True, exist_ok=True)
+                    content = resp.read()
+                    if len(content) > 0:
+                        with open(DB_PATH, "wb") as f:
+                            f.write(content)
+                        print(f"[EdgePulse DB] Successfully restored database from gs://{bucket}/{GCS_OBJECT} ({len(content)} bytes)")
+                        global GCS_BUCKET
+                        GCS_BUCKET = bucket
+                        return True
+        except urllib.error.HTTPError as he:
+            if he.code != 404:
+                print(f"[EdgePulse DB] GCS restore check from gs://{bucket}: HTTP {he.code}")
+        except Exception as e:
+            print(f"[EdgePulse DB] GCS restore check error: {e}")
+
+    if DB_PATH.exists() and DB_PATH.stat().st_size > 0:
+        print(f"[EdgePulse DB] Retaining existing local SQLite database ({DB_PATH.stat().st_size} bytes)")
     return False
 
 
 def _backup_worker():
     token = _get_gcp_access_token()
-    if not token or not GCS_BUCKET or not DB_PATH.exists():
+    if not token or not DB_PATH.exists():
         return
     try:
         try:
@@ -92,31 +107,41 @@ def _backup_worker():
         if len(data) == 0:
             return
 
-        url = f"https://storage.googleapis.com/upload/storage/v1/b/{GCS_BUCKET}/o?uploadType=media&name={urllib.parse.quote(GCS_OBJECT, safe='')}"
-        req = urllib.request.Request(
-            url,
-            data=data,
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Content-Type": "application/x-sqlite3",
-                "User-Agent": "EdgePulse/1.0",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            if resp.status in (200, 201):
-                print(f"[EdgePulse DB] Successfully backed up database to gs://{GCS_BUCKET}/{GCS_OBJECT} ({len(data)} bytes)")
+        for bucket in GCS_FALLBACK_BUCKETS:
+            if not bucket:
+                continue
+            try:
+                url = f"https://storage.googleapis.com/upload/storage/v1/b/{bucket}/o?uploadType=media&name={urllib.parse.quote(GCS_OBJECT, safe='')}"
+                req = urllib.request.Request(
+                    url,
+                    data=data,
+                    headers={
+                        "Authorization": f"Bearer {token}",
+                        "Content-Type": "application/x-sqlite3",
+                        "User-Agent": "EdgePulse/1.0",
+                    },
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    if resp.status in (200, 201):
+                        print(f"[EdgePulse DB] Successfully backed up database to gs://{bucket}/{GCS_OBJECT} ({len(data)} bytes)")
+                        return
+            except urllib.error.HTTPError as he:
+                if he.code != 404:
+                    print(f"[EdgePulse DB] GCS backup to gs://{bucket} failed HTTP {he.code}: {he.reason}")
+            except Exception as be:
+                print(f"[EdgePulse DB] GCS backup to gs://{bucket} error: {be}")
     except Exception as e:
         print(f"[EdgePulse DB] GCS backup failed: {e}")
 
 
-def trigger_gcs_backup(delay_seconds: float = 1.0):
-    """Trigger an asynchronous, debounced backup of the database to GCS."""
-    def run():
-        time.sleep(delay_seconds)
-        with _backup_lock:
-            _backup_worker()
-    threading.Thread(target=run, daemon=True).start()
+def trigger_gcs_backup(delay_seconds: float = 0.0):
+    """
+    Trigger immediate synchronous or instant backup to GCS.
+    Does NOT sleep to avoid Cloud Run freezing the thread between requests.
+    """
+    with _backup_lock:
+        _backup_worker()
 
 
 def get_connection() -> sqlite3.Connection:
@@ -130,11 +155,8 @@ def get_connection() -> sqlite3.Connection:
 
 
 def init_db():
-    """Create database tables and indexes if they do not already exist."""
+    """Create database tables and indexes if they do not already exist. NEVER wipes existing data."""
     restore_from_gcs()
-    if os.environ.get("CLEAR_DB_ON_BOOT") == "1":
-        print("[EdgePulse DB] CLEAR_DB_ON_BOOT=1 detected. Wiping all user data on boot...")
-        clear_all_users()
     conn = get_connection()
     try:
         with conn:

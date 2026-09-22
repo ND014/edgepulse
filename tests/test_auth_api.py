@@ -1,6 +1,7 @@
 import unittest
 import json
 import time
+import os
 from pathlib import Path
 from urllib.request import Request, urlopen
 from src import db
@@ -226,25 +227,43 @@ class TestProfileHTTPIntegration(unittest.TestCase):
             self.assertEqual(login_res["user"]["name"], "Sharpshooter Pro")
 
     def test_admin_clear_users_endpoint(self):
-        # 1. Calling clear_users without secret should fail (403)
-        req_unauth = Request(f"http://127.0.0.1:{self.port}/api/admin/clear_users", method="POST")
+        # 1. Calling clear_users when ALLOW_USER_WIPE is not set must fail (403)
+        if "ALLOW_USER_WIPE" in os.environ:
+            del os.environ["ALLOW_USER_WIPE"]
+        req_blocked = Request(
+            f"http://127.0.0.1:{self.port}/api/admin/clear_users?secret=edgepulse_wipe_2026",
+            method="POST"
+        )
         try:
-            with urlopen(req_unauth) as resp:
+            with urlopen(req_blocked) as resp:
                 self.assertNotEqual(resp.status, 200)
         except Exception as e:
             self.assertIn("403", str(e))
 
-        # 2. Calling with secret key should succeed
-        req_auth = Request(
-            f"http://127.0.0.1:{self.port}/api/admin/clear_users?secret=edgepulse_wipe_2026",
-            method="POST",
-            headers={"Content-Type": "application/json"}
-        )
-        with urlopen(req_auth) as resp:
-            self.assertEqual(resp.status, 200)
-            res = json.loads(resp.read().decode("utf-8"))
-            self.assertEqual(res["status"], "success")
-            self.assertIn("All user data successfully wiped", res["message"])
+        # 2. When ALLOW_USER_WIPE="1", calling without secret must fail (403)
+        try:
+            os.environ["ALLOW_USER_WIPE"] = "1"
+            req_unauth = Request(f"http://127.0.0.1:{self.port}/api/admin/clear_users", method="POST")
+            try:
+                with urlopen(req_unauth) as resp:
+                    self.assertNotEqual(resp.status, 200)
+            except Exception as e:
+                self.assertIn("403", str(e))
+
+            # 3. Calling with secret key and ALLOW_USER_WIPE="1" succeeds
+            req_auth = Request(
+                f"http://127.0.0.1:{self.port}/api/admin/clear_users?secret=edgepulse_wipe_2026",
+                method="POST",
+                headers={"Content-Type": "application/json"}
+            )
+            with urlopen(req_auth) as resp:
+                self.assertEqual(resp.status, 200)
+                res = json.loads(resp.read().decode("utf-8"))
+                self.assertEqual(res["status"], "success")
+                self.assertIn("All user data successfully wiped", res["message"])
+        finally:
+            if "ALLOW_USER_WIPE" in os.environ:
+                del os.environ["ALLOW_USER_WIPE"]
 
 
 if __name__ == '__main__':
