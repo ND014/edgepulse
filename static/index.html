@@ -180,6 +180,17 @@
               <div class="text-[11px] text-slate-400 mt-0.5">Click any league to scan real-time quotes and update market orderbooks.</div>
             </div>
 
+            <!-- ALL SPORTS UNIFIED -->
+            <div class="pt-1">
+              <button onclick="scanSport('all', 'All Sports (Unified Feed)', 'all')" class="w-full flex items-center justify-between p-2 rounded-xl bg-neonCyan/10 hover:bg-neonCyan/20 border border-neonCyan/40 transition text-left group">
+                <div>
+                  <div class="text-xs font-bold text-neonCyan group-hover:text-white transition">All Sports (Unified Feed) <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonCyan/30 text-white font-semibold">ALL 9 SPORTS</span></div>
+                  <div class="text-[10px] text-slate-300">Cricket, NFL, NHL, NBA, Soccer, Tennis, MLB, UFC, Boxing</div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/20 text-neonGreen border border-neonGreen/40 font-bold">Unified</span>
+              </button>
+            </div>
+
             <!-- BASEBALL -->
             <div class="pt-2">
               <div class="text-[10px] font-bold text-neonCyan tracking-wider uppercase px-2 mb-1">Baseball</div>
@@ -414,6 +425,39 @@
               </div>
             </div>
 
+            <!-- AMERICAN FOOTBALL -->
+            <div class="pt-2">
+              <div class="text-[10px] font-bold text-sky-400 tracking-wider uppercase px-2 mb-1">American Football</div>
+              <div class="space-y-1">
+                <button onclick="scanSport('americanfootball_nfl', 'Football (NFL)', 'americanfootball')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
+                  <div>
+                    <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">NFL (National Football League)</div>
+                    <div class="text-[10px] text-slate-400">Regular Season, Playoffs & Super Bowl</div>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+                </button>
+                <button onclick="scanSport('americanfootball_ncaaf', 'NCAA Football', 'americanfootball')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
+                  <div>
+                    <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">NCAA College Football (NCAAF)</div>
+                    <div class="text-[10px] text-slate-400">Division 1 College Football</div>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ICE HOCKEY -->
+            <div class="pt-2">
+              <div class="text-[10px] font-bold text-cyan-400 tracking-wider uppercase px-2 mb-1">Ice Hockey</div>
+              <button onclick="scanSport('icehockey_nhl', 'Hockey (NHL)', 'icehockey')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
+                <div>
+                  <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">NHL (National Hockey League)</div>
+                  <div class="text-[10px] text-slate-400">USA & Canada Pro Ice Hockey</div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+              </button>
+            </div>
+
           </div>
         </div>
 
@@ -630,14 +674,41 @@
       <div>
         <h2 class="text-lg font-bold text-white tracking-tight flex items-center space-x-2">
           <span>Choose a Sport to Scan</span>
-          <span class="text-xs font-mono font-normal text-slate-400">· 7 Major Categories</span>
+          <span class="text-xs font-mono font-normal text-slate-400">· 9 Major Categories & Multi-Sport Feed</span>
         </h2>
         <p class="text-xs text-slate-400 font-mono mt-0.5">Institutional orderbooks with continuous mathematical devigging against sharp benchmarks.</p>
       </div>
     </div>
 
-    <!-- Sports Grid (7 Rich Cards) -->
+    <!-- Sports Grid (9 Rich Cards + Unified Feed) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- 0. Unified Multi-Sport Feed -->
+      <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-gradient-to-r from-brandCard via-brandCard/95 to-brandDark border-2 border-neonCyan/40 hover:border-neonCyan transition duration-200 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between shadow-2xl gap-4">
+        <div class="space-y-2 max-w-3xl">
+          <div class="flex items-center space-x-2">
+            <span class="px-2.5 py-0.5 rounded-full bg-neonCyan/20 border border-neonCyan/40 text-neonCyan text-[10px] font-mono font-bold">
+              UNIFIED FEED
+            </span>
+            <span class="text-xs font-mono text-neonGreen font-semibold">● All 9 Sports Active</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-white">All Sports Live Market Board</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Scan and devig thousands of active lines across all sports simultaneously: Cricket (ODI/T20), NFL Football, NHL Hockey, NBA Basketball, Soccer, Tennis, MLB Baseball, UFC/MMA, and Boxing.
+          </p>
+          <div class="flex flex-wrap gap-2 pt-1 text-[11px] font-mono text-slate-400">
+            <span class="bg-brandDark px-2 py-0.5 rounded border border-brandBorder">230+ Live Matches</span>
+            <span class="bg-brandDark px-2 py-0.5 rounded border border-brandBorder">5,000+ Bookmaker Quotes</span>
+            <span class="bg-brandDark px-2 py-0.5 rounded border border-brandBorder text-neonGreen font-semibold">250+ +EV Opportunities</span>
+          </div>
+        </div>
+        <div class="shrink-0 flex items-center">
+          <button onclick="selectSportFromHub('all', 'All Sports (Unified Feed)', 'all')" class="w-full md:w-auto px-6 py-3 rounded-xl bg-neonCyan hover:bg-cyan-300 text-black font-extrabold font-mono text-xs transition active:scale-95 shadow-lg shadow-neonCyan/20 flex items-center justify-center space-x-2">
+            <span>Launch Unified Multi-Sport Board</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
 
       <!-- 1. UFC / MMA (Cached & Instant Ready) -->
       <div class="bg-brandCard border border-brandBorder hover:border-neonCyan/80 transition duration-200 rounded-3xl p-6 flex flex-col justify-between shadow-xl group relative overflow-hidden">
@@ -878,6 +949,71 @@
         </div>
       </div>
 
+      <!-- 8. American Football (NFL) -->
+      <div class="bg-brandCard border border-brandBorder hover:border-sky-400/80 transition duration-200 rounded-3xl p-6 flex flex-col justify-between shadow-xl group relative overflow-hidden">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+              🏈
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <span class="px-2.5 py-0.5 rounded-full bg-neonGreen/10 border border-neonGreen/30 text-neonGreen text-[10px] font-mono font-bold">
+                ACTIVE ORDERBOOK
+              </span>
+              <span class="text-[10px] font-mono text-slate-400">NFL & NCAA Lines</span>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white group-hover:text-sky-400 transition">American Football (NFL & NCAAF)</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              NFL Moneyline, Spread & Total points markets devigged against sharp market-makers.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <button onclick="selectSportFromHub('americanfootball_nfl', 'Football (NFL)', 'americanfootball')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 hover:border-sky-400 hover:text-white transition">NFL Matches</button>
+            <button onclick="selectSportFromHub('americanfootball_ncaaf', 'NCAA Football', 'americanfootball')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-sky-400 hover:text-sky-400 transition">College Football (NCAAF)</button>
+          </div>
+        </div>
+        <div class="pt-6 mt-2 border-t border-brandBorder/50">
+          <button onclick="selectSportFromHub('americanfootball_nfl', 'Football (NFL)', 'americanfootball')" class="w-full py-2.5 px-4 rounded-xl bg-sky-400 hover:bg-sky-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2">
+            <span>Launch Football Market Board</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 9. Ice Hockey (NHL) -->
+      <div class="bg-brandCard border border-brandBorder hover:border-cyan-400/80 transition duration-200 rounded-3xl p-6 flex flex-col justify-between shadow-xl group relative overflow-hidden">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+              🏒
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <span class="px-2.5 py-0.5 rounded-full bg-neonGreen/10 border border-neonGreen/30 text-neonGreen text-[10px] font-mono font-bold">
+                ACTIVE ORDERBOOK
+              </span>
+              <span class="text-[10px] font-mono text-slate-400">NHL Games</span>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white group-hover:text-cyan-400 transition">Ice Hockey (NHL)</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              National Hockey League moneyline including overtime and shootouts with tight margins and pricing edges.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <button onclick="selectSportFromHub('icehockey_nhl', 'Hockey (NHL)', 'icehockey')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:border-cyan-400 hover:text-white transition">NHL Games</button>
+          </div>
+        </div>
+        <div class="pt-6 mt-2 border-t border-brandBorder/50">
+          <button onclick="selectSportFromHub('icehockey_nhl', 'Hockey (NHL)', 'icehockey')" class="w-full py-2.5 px-4 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-cyan-400/20 flex items-center justify-center space-x-2">
+            <span>Launch Hockey Market Board</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Hub Footer Quick Info -->
@@ -1039,13 +1175,15 @@
     <div class="flex items-center justify-between overflow-x-auto pb-1 gap-2">
       <div class="flex items-center space-x-2 text-xs font-mono shrink-0">
         <button onclick="setFilter('all')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-neonCyan text-black font-bold" data-sport="all">All Sports</button>
-        <button onclick="setFilter('baseball')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="baseball">Baseball</button>
-        <button onclick="setFilter('boxing')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="boxing">Boxing</button>
-        <button onclick="setFilter('ufc')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="ufc">UFC / MMA</button>
-        <button onclick="setFilter('basketball_nba')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="basketball_nba">Basketball</button>
-        <button onclick="setFilter('cricket_t20')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="cricket_t20">Cricket</button>
+        <button onclick="setFilter('cricket_t20')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="cricket_t20">Cricket (ODI/T20)</button>
         <button onclick="setFilter('soccer_dnb')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="soccer_dnb">Soccer</button>
         <button onclick="setFilter('tennis')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="tennis">Tennis</button>
+        <button onclick="setFilter('basketball_nba')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="basketball_nba">Basketball</button>
+        <button onclick="setFilter('baseball')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="baseball">Baseball</button>
+        <button onclick="setFilter('americanfootball')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="americanfootball">Football (NFL)</button>
+        <button onclick="setFilter('icehockey')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="icehockey">Hockey (NHL)</button>
+        <button onclick="setFilter('ufc')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="ufc">UFC / MMA</button>
+        <button onclick="setFilter('boxing')" class="sport-filter-btn px-3.5 py-2 rounded-lg bg-brandCard border border-brandBorder text-slate-300 hover:text-white" data-sport="boxing">Boxing</button>
       </div>
 
       <div class="hidden xl:flex items-center space-x-2 text-xs text-slate-400 font-mono shrink-0">
@@ -1770,10 +1908,14 @@
         <div>
           <h4 class="font-bold text-white uppercase tracking-wider mb-3 text-[11px]">Benchmarked Sports</h4>
           <ul class="space-y-2 text-slate-400">
+            <li><button onclick="selectSportFromHub('all', 'All Sports (Unified)', 'all')" class="text-neonCyan font-bold hover:underline transition cursor-pointer">All Sports (Unified)</button></li>
             <li><button onclick="selectSportFromHub('cricket', 'Cricket (ODI & T20)', 'cricket_t20')" class="hover:text-neonCyan transition cursor-pointer">Cricket (ODI & T20)</button></li>
+            <li><button onclick="selectSportFromHub('americanfootball_nfl', 'Football (NFL)', 'americanfootball')" class="hover:text-neonCyan transition cursor-pointer">Football (NFL)</button></li>
+            <li><button onclick="selectSportFromHub('icehockey_nhl', 'Hockey (NHL)', 'icehockey')" class="hover:text-neonCyan transition cursor-pointer">Hockey (NHL)</button></li>
             <li><button onclick="selectSportFromHub('tennis', 'Tennis (ATP & WTA)', 'tennis')" class="hover:text-neonCyan transition cursor-pointer">Tennis (ATP & WTA)</button></li>
             <li><button onclick="selectSportFromHub('soccer_epl', 'Soccer (Premier League)', 'soccer_dnb')" class="hover:text-neonCyan transition cursor-pointer">Soccer (EPL & UEFA)</button></li>
             <li><button onclick="selectSportFromHub('basketball_nba', 'Basketball (NBA)', 'basketball_nba')" class="hover:text-neonCyan transition cursor-pointer">Basketball (NBA)</button></li>
+            <li><button onclick="selectSportFromHub('baseball_mlb', 'Baseball (MLB)', 'baseball')" class="hover:text-neonCyan transition cursor-pointer">Baseball (MLB)</button></li>
             <li><button onclick="selectSportFromHub('ufc', 'UFC / MMA', 'ufc')" class="hover:text-neonCyan transition cursor-pointer">UFC / MMA</button></li>
           </ul>
         </div>
@@ -2139,11 +2281,11 @@
       currentLiveFilterKey = filterKey;
       showDashboardView(true);
 
-      // Attempt to load from local cache first (works for all 7 sports!)
+      // Attempt to load from local cache first (works for all sports!)
       showToast(`Loading ${displayName}...`);
       await setFilter(filterKey || 'all', false);
       try {
-        const res = await fetch(`/api/load_cached?sport=${filterKey}`, { method: 'POST', headers: getAuthHeaders() });
+        const res = await fetch(`/api/load_cached?sport=${filterKey || 'all'}`, { method: 'POST', headers: getAuthHeaders() });
         const data = await res.json();
         if (data.status === 'success' && data.loaded) {
           showToast(`✅ Loaded ${displayName} markets!`);
@@ -2502,7 +2644,24 @@
       if ((f === 'cricket_t20' || f === 'cricket') && s.includes('cricket')) return true;
       if ((f === 'soccer_dnb' || f === 'soccer') && s.includes('soccer')) return true;
       if (f === 'tennis' && s.includes('tennis')) return true;
+      if ((f === 'americanfootball' || f === 'americanfootball_nfl' || f === 'nfl' || f === 'football') && (s.includes('americanfootball') || s.includes('nfl') || s.includes('football'))) return true;
+      if ((f === 'icehockey' || f === 'icehockey_nhl' || f === 'nhl' || f === 'hockey') && (s.includes('icehockey') || s.includes('nhl') || s.includes('hockey'))) return true;
       return false;
+    }
+
+    function formatSportDisplay(sport) {
+      if (!sport) return 'UNKNOWN';
+      const s = String(sport).toLowerCase();
+      if (s.includes('cricket')) return 'CRICKET (ODI/T20)';
+      if (s.includes('americanfootball') || s.includes('nfl')) return 'NFL FOOTBALL';
+      if (s.includes('icehockey') || s.includes('nhl') || s.includes('hockey')) return 'NHL HOCKEY';
+      if (s.includes('soccer')) return 'SOCCER';
+      if (s.includes('basketball')) return 'BASKETBALL (NBA)';
+      if (s.includes('tennis')) return 'TENNIS';
+      if (s.includes('baseball')) return 'BASEBALL (MLB)';
+      if (s.includes('ufc') || s.includes('mma')) return 'UFC / MMA';
+      if (s.includes('boxing')) return 'BOXING';
+      return sport.toUpperCase();
     }
 
     let currentLiveSportKey = '';
@@ -2608,6 +2767,8 @@
       'cricket_t20': { key: 'cricket', name: 'Cricket (ODI & T20)', filter: 'cricket_t20' },
       'soccer_dnb': { key: 'soccer_epl', name: 'Soccer (EPL)', filter: 'soccer_dnb' },
       'tennis': { key: 'tennis', name: 'Tennis (ATP & WTA)', filter: 'tennis' },
+      'americanfootball': { key: 'americanfootball_nfl', name: 'Football (NFL)', filter: 'americanfootball' },
+      'icehockey': { key: 'icehockey_nhl', name: 'Hockey (NHL)', filter: 'icehockey' },
     };
 
     async function setFilter(sport, switchSportData = true) {
@@ -2624,7 +2785,20 @@
         }
       });
 
-      if (sport !== 'all' && switchSportData) {
+      if (sport === 'all' && switchSportData) {
+        if (!lastStateData || lastStateData.active_sport_filter !== 'all') {
+          try {
+            showToast('Loading All Sports unified feed...');
+            const res = await fetch('/api/load_cached?sport=all', { method: 'POST', headers: getAuthHeaders() });
+            const data = await res.json();
+            if (data.status === 'success') {
+              showToast('✅ Loaded unified multi-sport market board!');
+            }
+          } catch (e) {
+            console.warn('Error loading all sports cache on tab switch:', e);
+          }
+        }
+      } else if (sport !== 'all' && switchSportData) {
         const meta = SPORT_TAB_METADATA[sport];
         if (meta) {
           activeSportSelected = true;
@@ -3940,7 +4114,7 @@
               <!-- Header Row -->
               <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center space-x-1.5">
-                  <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-slate-200 font-bold">${arb.sport}</span>
+                  <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-slate-200 font-bold">${formatSportDisplay(arb.sport)}</span>
                   <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-neonYellow/20 text-neonYellow border border-neonYellow/40 font-bold">ZERO RISK</span>
                 </div>
                 <div class="text-xs font-mono font-extrabold text-neonGreen bg-neonGreen/10 border border-neonGreen/40 px-2.5 py-1 rounded-lg">
@@ -5074,7 +5248,7 @@
                 <!-- Top Row: League & EV Badge -->
                 <div class="flex items-center justify-between mb-2.5">
                   <div class="flex items-center space-x-1.5">
-                    <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-slate-300 font-bold tracking-wider">${a.sport}</span>
+                    <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-slate-300 font-bold tracking-wider">${formatSportDisplay(a.sport)}</span>
                     ${bookCount > 0 ? `<span class="text-[10px] font-mono text-slate-400">${bookCount} books</span>` : ''}
                   </div>
                   <span class="text-xs font-mono font-bold text-neonGreen bg-neonGreen/10 border border-neonGreen/30 px-2.5 py-0.5 rounded-lg shadow-sm">${a.expected_value} EV</span>
@@ -5213,7 +5387,7 @@
             <div class="bg-brandCard border border-brandBorder rounded-2xl p-4 hover:border-slate-600 transition shadow-md">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-brandBorder/60 gap-2">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-neonCyan font-bold">${e.sport}</span>
+                  <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brandBorder text-neonCyan font-bold">${formatSportDisplay(e.sport)}</span>
                   <span class="text-sm font-bold text-white">${e.side_a} <span class="text-slate-500 font-normal">vs</span> ${e.side_b}</span>
                   <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${badgeClass} font-bold">${bookCount} Books ${currentSelectedRegion !== 'all' ? `(${getRegionShortName(currentSelectedRegion)})` : 'Quoting'}</span>
                   ${eventDate.formatted !== 'Time TBD' ? `

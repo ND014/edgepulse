@@ -15,6 +15,8 @@ class Sport(str, Enum):
     BASKETBALL_NBA = "basketball_nba"
     CRICKET_T20 = "cricket_t20"
     SOCCER_DNB = "soccer_dnb"  # Draw No Bet / Asian Handicap 0.0
+    AMERICAN_FOOTBALL = "americanfootball"
+    ICE_HOCKEY = "icehockey"
 
 
 class MarketType(str, Enum):

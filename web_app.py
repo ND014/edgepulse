@@ -68,9 +68,9 @@ max_edge_found: float = 0.0
 quota_remaining = 437
 quota_used = 63
 state_lock = threading.Lock()
-current_active_sport_name = "UFC / MMA"
-current_active_sport_filter = "ufc"
-current_active_sport_key = "mma_mixed_martial_arts"
+current_active_sport_name = "All Active Sports"
+current_active_sport_filter = "all"
+current_active_sport_key = "all"
 CACHE_DIR = ROOT_DIR / "data_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 CACHE_FILE = CACHE_DIR / "latest.json"
@@ -121,7 +121,34 @@ def is_match_active_or_upcoming(commence_time_str: str, max_hours_past: float = 
         return True
 
 
+def sport_key_to_enum(sport_key: str) -> Sport:
+    """Resolve sport key or league key to the corresponding canonical Sport enum."""
+    sk = (sport_key or "").lower()
+    if sk.startswith("cricket"):
+        return Sport.CRICKET_T20
+    if sk.startswith("tennis"):
+        return Sport.TENNIS
+    if sk.startswith("soccer"):
+        return Sport.SOCCER_DNB
+    if sk.startswith("basketball"):
+        return Sport.BASKETBALL_NBA
+    if sk.startswith("baseball"):
+        return Sport.BASEBALL
+    if sk.startswith("mma") or sk.startswith("ufc"):
+        return Sport.UFC
+    if sk.startswith("boxing"):
+        return Sport.BOXING
+    if sk.startswith("americanfootball") or sk.startswith("football"):
+        return Sport.AMERICAN_FOOTBALL
+    if sk.startswith("icehockey") or sk.startswith("hockey"):
+        return Sport.ICE_HOCKEY
+    return Sport.UFC
+
+
 SPORT_API_MAP = {
+    # All Sports (Unified Feed)
+    "all": ("all", None, Sport.UFC, "All Sports (Live Consensus)", "all", "All Sports", "Unified Multi-Sport Live Feed across all markets"),
+
     # Baseball
     "baseball_mlb": ("baseball_mlb", "baseball_npb", Sport.BASEBALL, "Baseball (MLB)", "baseball", "Baseball", "Major League Baseball (USA)"),
     "baseball_npb": ("baseball_npb", None, Sport.BASEBALL, "Baseball (NPB)", "baseball", "Baseball", "Nippon Professional Baseball (Japan)"),
@@ -143,7 +170,7 @@ SPORT_API_MAP = {
     "basketball_nbl": ("basketball_nbl", None, Sport.BASKETBALL_NBA, "Basketball (NBL)", "basketball_nba", "Basketball", "National Basketball League (Australia)"),
     "basketball": ("basketball_nba", "basketball_wnba", Sport.BASKETBALL_NBA, "Basketball (NBA)", "basketball_nba", "Basketball", "NBA"),
 
-    # Cricket (Active In-Season)
+    # Cricket (Active In-Season - NO TEST MATCHES)
     "cricket_odi": ("cricket_odi", "cricket_international_t20", Sport.CRICKET_T20, "Cricket (ODI)", "cricket_t20", "Cricket", "One Day Internationals (50 Over)"),
     "cricket_international_t20": ("cricket_international_t20", "cricket_odi", Sport.CRICKET_T20, "Cricket (Intl T20)", "cricket_t20", "Cricket", "ICC International Twenty20"),
     "cricket_caribbean_premier_league": ("cricket_caribbean_premier_league", "cricket_odi", Sport.CRICKET_T20, "Cricket (CPL)", "cricket_t20", "Cricket", "Caribbean Premier League (West Indies)"),
@@ -155,9 +182,9 @@ SPORT_API_MAP = {
     "cricket_big_bash": ("cricket_big_bash", None, Sport.CRICKET_T20, "Cricket (BBL)", "cricket_t20", "Cricket", "Big Bash League (Seasonal: Dec-Feb)"),
     "cricket_psl": ("cricket_psl", None, Sport.CRICKET_T20, "Cricket (PSL)", "cricket_t20", "Cricket", "Pakistan Super League (Seasonal: Feb-Mar)"),
     "cricket_the_hundred": ("cricket_the_hundred", None, Sport.CRICKET_T20, "Cricket (The Hundred)", "cricket_t20", "Cricket", "The Hundred UK (Seasonal: Summer)"),
-    "cricket_test_match": ("cricket_test_match", None, Sport.CRICKET_T20, "Cricket (Test)", "cricket_t20", "Cricket", "ICC International Test Matches"),
 
     # Soccer (Draw No Bet)
+    "soccer_usa_mls": ("soccer_usa_mls", "soccer_epl", Sport.SOCCER_DNB, "Soccer (MLS)", "soccer_dnb", "Soccer", "USA Major League Soccer"),
     "soccer_epl": ("soccer_epl", "soccer_uefa_champs_league", Sport.SOCCER_DNB, "Soccer (EPL)", "soccer_dnb", "Soccer", "English Premier League"),
     "soccer_uefa_champs_league": ("soccer_uefa_champs_league", "soccer_uefa_europa_league", Sport.SOCCER_DNB, "Soccer (UCL)", "soccer_dnb", "Soccer", "UEFA Champions League"),
     "soccer_uefa_europa_league": ("soccer_uefa_europa_league", None, Sport.SOCCER_DNB, "Soccer (Europa League)", "soccer_dnb", "Soccer", "UEFA Europa League"),
@@ -165,15 +192,23 @@ SPORT_API_MAP = {
     "soccer_germany_bundesliga": ("soccer_germany_bundesliga", None, Sport.SOCCER_DNB, "Soccer (Bundesliga)", "soccer_dnb", "Soccer", "German Bundesliga"),
     "soccer_italy_serie_a": ("soccer_italy_serie_a", None, Sport.SOCCER_DNB, "Soccer (Serie A)", "soccer_dnb", "Soccer", "Italian Serie A"),
     "soccer_france_ligue_one": ("soccer_france_ligue_one", None, Sport.SOCCER_DNB, "Soccer (Ligue 1)", "soccer_dnb", "Soccer", "French Ligue 1"),
-    "soccer_usa_mls": ("soccer_usa_mls", None, Sport.SOCCER_DNB, "Soccer (MLS)", "soccer_dnb", "Soccer", "USA Major League Soccer"),
-    "soccer_dnb": ("soccer_epl", "soccer_uefa_champs_league", Sport.SOCCER_DNB, "Soccer (EPL)", "soccer_dnb", "Soccer", "English Premier League"),
-    "soccer": ("soccer_epl", "soccer_uefa_champs_league", Sport.SOCCER_DNB, "Soccer (EPL)", "soccer_dnb", "Soccer", "English Premier League"),
+    "soccer_dnb": ("soccer_usa_mls", "soccer_epl", Sport.SOCCER_DNB, "Soccer (MLS, EPL, La Liga)", "soccer_dnb", "Soccer", "Major Global Soccer"),
+    "soccer": ("soccer_usa_mls", "soccer_epl", Sport.SOCCER_DNB, "Soccer (MLS, EPL, La Liga)", "soccer_dnb", "Soccer", "Major Global Soccer"),
 
     # Tennis
     "tennis_wta_singapore_open": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (WTA Singapore)", "tennis", "Tennis", "WTA Singapore Open"),
     "tennis_atp": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (ATP Tour)", "tennis", "Tennis", "ATP Tour (Men's)"),
     "tennis_wta": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (WTA Tour)", "tennis", "Tennis", "WTA Tour (Women's)"),
     "tennis": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (ATP & WTA)", "tennis", "Tennis", "Active Tennis Tournaments"),
+
+    # American Football
+    "americanfootball_nfl": ("americanfootball_nfl", "americanfootball_ncaaf", Sport.AMERICAN_FOOTBALL, "Football (NFL)", "americanfootball", "Football", "NFL Professional Football"),
+    "americanfootball_ncaaf": ("americanfootball_ncaaf", None, Sport.AMERICAN_FOOTBALL, "Football (NCAA)", "americanfootball", "Football", "NCAA College Football"),
+    "americanfootball": ("americanfootball_nfl", "americanfootball_ncaaf", Sport.AMERICAN_FOOTBALL, "Football (NFL & NCAA)", "americanfootball", "Football", "American Football"),
+
+    # Ice Hockey
+    "icehockey_nhl": ("icehockey_nhl", None, Sport.ICE_HOCKEY, "Hockey (NHL)", "icehockey", "Hockey", "National Hockey League"),
+    "icehockey": ("icehockey_nhl", None, Sport.ICE_HOCKEY, "Hockey (NHL)", "icehockey", "Hockey", "National Hockey League"),
 }
 
 
@@ -243,7 +278,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
     global quota_remaining, quota_used, current_active_sport_name, current_active_sport_filter, current_active_sport_key
 
     if sport_key not in SPORT_API_MAP:
-        sport_key = "cricket_t20"
+        sport_key = "all" if sport_key == "all" else "cricket_t20"
 
     primary_key, fallback_key, sport_enum, display_name, filter_key, group_name, _ = SPORT_API_MAP[sport_key]
     current_active_sport_key = sport_key
@@ -313,8 +348,33 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
     active_keys = [s.get("key") for s in active_sports if s.get("active") and not s.get("has_outrights")]
 
     target_leagues = [primary_key]
-    if sport_key in ("cricket", "cricket_t20"):
-        cricket_active = [k for k in active_keys if k.startswith("cricket_")]
+    if sport_key == "all":
+        target_leagues = []
+        # Cricket (all active non-test)
+        target_leagues.extend([k for k in active_keys if k.startswith("cricket_") and "test" not in k.lower()])
+        # Tennis
+        target_leagues.extend([k for k in active_keys if k.startswith("tennis_")][:2])
+        # Soccer (top active)
+        soccer_cand = [k for k in ["soccer_usa_mls", "soccer_epl", "soccer_spain_la_liga"] if k in active_keys]
+        target_leagues.extend(soccer_cand[:2])
+        # Basketball
+        basket_cand = [k for k in ["basketball_nba", "basketball_wnba"] if k in active_keys]
+        target_leagues.extend(basket_cand[:1])
+        # Baseball
+        bb_cand = [k for k in ["baseball_mlb", "baseball_npb"] if k in active_keys]
+        target_leagues.extend(bb_cand[:1])
+        # MMA & Boxing
+        if "mma_mixed_martial_arts" in active_keys:
+            target_leagues.append("mma_mixed_martial_arts")
+        if "boxing_boxing" in active_keys:
+            target_leagues.append("boxing_boxing")
+        # American Football & Hockey
+        if "americanfootball_nfl" in active_keys:
+            target_leagues.append("americanfootball_nfl")
+        if "icehockey_nhl" in active_keys:
+            target_leagues.append("icehockey_nhl")
+    elif sport_key in ("cricket", "cricket_t20"):
+        cricket_active = [k for k in active_keys if k.startswith("cricket_") and "test" not in k.lower()]
         if cricket_active:
             target_leagues = cricket_active
         else:
@@ -325,6 +385,36 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
             target_leagues = tennis_active
         else:
             target_leagues = ["tennis_wta_singapore_open"]
+    elif sport_key in ("soccer", "soccer_dnb"):
+        soccer_active = [k for k in ["soccer_usa_mls", "soccer_epl", "soccer_spain_la_liga", "soccer_uefa_champs_league"] if k in active_keys]
+        if soccer_active:
+            target_leagues = soccer_active
+        else:
+            target_leagues = ["soccer_usa_mls", "soccer_epl"]
+    elif sport_key in ("basketball", "basketball_nba"):
+        basket_active = [k for k in ["basketball_nba", "basketball_wnba", "basketball_euroleague"] if k in active_keys]
+        if basket_active:
+            target_leagues = basket_active
+        else:
+            target_leagues = ["basketball_nba"]
+    elif sport_key in ("baseball", "baseball_mlb"):
+        bb_active = [k for k in ["baseball_mlb", "baseball_npb"] if k in active_keys]
+        if bb_active:
+            target_leagues = bb_active
+        else:
+            target_leagues = ["baseball_mlb"]
+    elif sport_key in ("americanfootball", "americanfootball_nfl"):
+        af_active = [k for k in ["americanfootball_nfl", "americanfootball_ncaaf"] if k in active_keys]
+        if af_active:
+            target_leagues = af_active
+        else:
+            target_leagues = ["americanfootball_nfl"]
+    elif sport_key in ("icehockey", "icehockey_nhl"):
+        ih_active = [k for k in ["icehockey_nhl"] if k in active_keys]
+        if ih_active:
+            target_leagues = ih_active
+        else:
+            target_leagues = ["icehockey_nhl"]
     elif primary_key not in active_keys and active_keys:
         if fallback_key and fallback_key in active_keys:
             target_leagues = [fallback_key]
@@ -363,6 +453,8 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                         m for m in league_data
                         if is_match_active_or_upcoming(m.get("commence_time", ""), max_hours_past=12.0)
                     ]
+                    for vm in valid_matches:
+                        vm["sport_key"] = l_key
                     combined_matches.extend(valid_matches)
                     api_calls_made += 1
                     leagues_used.append(l_key)
@@ -417,6 +509,17 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
     total_fetched = 0
     for match in combined_matches:
         commence_time = match.get("commence_time", "")
+        m_sport_key = match.get("sport_key", "")
+        m_enum = sport_key_to_enum(m_sport_key) if m_sport_key else sport_enum
+
+        # STRICT USER RULE: Exclude test cricket matches
+        if m_enum == Sport.CRICKET_T20:
+            ht = match.get("home_team", "").lower()
+            at = match.get("away_team", "").lower()
+            st = match.get("sport_title", "").lower()
+            if "test" in ht or "test" in at or "test" in st:
+                continue
+
         for b in match.get("bookmakers", []):
             b_name = b.get("key", "").lower()
             for m in b.get("markets", []):
@@ -425,7 +528,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                     if len(outcomes) == 2:
                         q = OddsQuote(
                             event_id="",
-                            sport=sport_enum,
+                            sport=m_enum,
                             market_type=MarketType.HEAD_TO_HEAD,
                             bookmaker=b_name,
                             side_a=outcomes[0]["name"],
@@ -438,7 +541,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                         )
                         process_quote(q, is_live=True)
                         total_fetched += 1
-                    elif len(outcomes) == 3 and sport_enum == Sport.SOCCER_DNB:
+                    elif len(outcomes) == 3 and m_enum == Sport.SOCCER_DNB:
                         draw_outcome = None
                         non_draw = []
                         for oc in outcomes:
@@ -457,7 +560,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                                     if dec_a > 1.01 and dec_b > 1.01:
                                         q = OddsQuote(
                                             event_id="",
-                                            sport=sport_enum,
+                                            sport=m_enum,
                                             market_type=MarketType.DRAW_NO_BET,
                                             bookmaker=b_name,
                                             side_a=non_draw[0]["name"],
@@ -495,7 +598,7 @@ def get_cached_sports() -> list:
     return cached
 
 
-def load_cached_odds(target_filter="ufc"):
+def load_cached_odds(target_filter="all"):
     """Load real live bookmaker data from local cache if present."""
     global quota_remaining, quota_used, current_active_sport_name, current_active_sport_filter, current_active_sport_key
 
@@ -510,8 +613,126 @@ def load_cached_odds(target_filter="ufc"):
         "tennis_atp": "tennis",
         "tennis_wta": "tennis",
         "tennis_wta_singapore_open": "tennis",
+        "nfl": "americanfootball",
+        "football": "americanfootball",
+        "nhl": "icehockey",
+        "hockey": "icehockey",
     }
     normalized = alias_map.get(target_filter, target_filter)
+
+    # 1. Global / All Sports Unified Loading
+    if normalized in ("all", "*", ""):
+        target_files = sorted(CACHE_DIR.glob("cache_*.json"))
+        if not target_files:
+            if CACHE_FILE.exists():
+                target_files = [CACHE_FILE]
+            else:
+                return False
+        clear_board_state()
+        current_active_sport_key = "all"
+        current_active_sport_name = "All Active Sports"
+        current_active_sport_filter = "all"
+        total_ingested = 0
+
+        for tf in target_files:
+            try:
+                with open(tf, "r", encoding="utf-8") as cf:
+                    payload = json.load(cf)
+                raw_data = payload.get("data", [])
+                s_enum_val = payload.get("sport_enum", "ufc")
+                try:
+                    s_enum = Sport(s_enum_val)
+                except Exception:
+                    s_enum = Sport.UFC
+
+                if payload.get("quota_remaining") is not None:
+                    quota_remaining = payload.get("quota_remaining")
+                if payload.get("quota_used") is not None:
+                    quota_used = payload.get("quota_used")
+
+                # Filter concluded matches
+                data = [
+                    m for m in raw_data
+                    if is_match_active_or_upcoming(m.get("commence_time", ""), max_hours_past=12.0)
+                ]
+                if not data:
+                    data = raw_data
+
+                for match in data:
+                    commence_time = match.get("commence_time", "")
+                    m_sport_key = match.get("sport_key", "")
+                    m_enum = sport_key_to_enum(m_sport_key) if m_sport_key else s_enum
+
+                    # STRICT RULE: Exclude test cricket matches
+                    if m_enum == Sport.CRICKET_T20:
+                        ht = match.get("home_team", "").lower()
+                        at = match.get("away_team", "").lower()
+                        st = match.get("sport_title", "").lower()
+                        if "test" in ht or "test" in at or "test" in st:
+                            continue
+
+                    for b in match.get("bookmakers", []):
+                        b_name = b.get("key", "").lower()
+                        for m in b.get("markets", []):
+                            if m.get("key") == "h2h":
+                                outcomes = m.get("outcomes", [])
+                                if len(outcomes) == 2:
+                                    q = OddsQuote(
+                                        event_id="",
+                                        sport=m_enum,
+                                        market_type=MarketType.HEAD_TO_HEAD,
+                                        bookmaker=b_name,
+                                        side_a=outcomes[0]["name"],
+                                        side_b=outcomes[1]["name"],
+                                        side_a_odds=float(outcomes[0]["price"]),
+                                        side_b_odds=float(outcomes[1]["price"]),
+                                        odds_format=OddsFormat.AMERICAN,
+                                        timestamp=time.time(),
+                                        commence_time=commence_time,
+                                    )
+                                    process_quote(q, is_live=False)
+                                    total_ingested += 1
+                                elif len(outcomes) == 3 and m_enum == Sport.SOCCER_DNB:
+                                    draw_outcome = None
+                                    non_draw = []
+                                    for oc in outcomes:
+                                        if oc.get("name", "").strip().lower() in ("draw", "tie"):
+                                            draw_outcome = oc
+                                        else:
+                                            non_draw.append(oc)
+                                    if len(non_draw) == 2 and draw_outcome:
+                                        try:
+                                            from src.math_engine import american_to_decimal, decimal_to_american
+                                            dec_draw = american_to_decimal(float(draw_outcome["price"]))
+                                            if dec_draw > 1.01:
+                                                dnb_factor = 1.0 - (1.0 / dec_draw)
+                                                dec_a = american_to_decimal(float(non_draw[0]["price"])) * dnb_factor
+                                                dec_b = american_to_decimal(float(non_draw[1]["price"])) * dnb_factor
+                                                if dec_a > 1.01 and dec_b > 1.01:
+                                                    q = OddsQuote(
+                                                        event_id="",
+                                                        sport=m_enum,
+                                                        market_type=MarketType.DRAW_NO_BET,
+                                                        bookmaker=b_name,
+                                                        side_a=non_draw[0]["name"],
+                                                        side_b=non_draw[1]["name"],
+                                                        side_a_odds=float(decimal_to_american(dec_a)),
+                                                        side_b_odds=float(decimal_to_american(dec_b)),
+                                                        odds_format=OddsFormat.AMERICAN,
+                                                        timestamp=time.time(),
+                                                        commence_time=commence_time,
+                                                    )
+                                                    process_quote(q, is_live=False)
+                                                    total_ingested += 1
+                                        except Exception:
+                                            pass
+            except Exception as e:
+                print(f"Error loading {tf}: {e}")
+
+        print(f"Loaded unified multi-sport board: {total_ingested} quotes across {len(target_files)} sports.")
+        return True
+
+    # 2. Single Sport Loading
     target_file = CACHE_DIR / f"cache_{normalized}.json"
     if not target_file.exists():
         target_file = CACHE_DIR / f"cache_{target_filter}.json"
@@ -540,16 +761,27 @@ def load_cached_odds(target_filter="ufc"):
             data = raw_data
 
         clear_board_state()
-        current_active_sport_key = payload.get("sport_key", "mma_mixed_martial_arts")
-        current_active_sport_name = payload.get("display_name", "UFC / MMA")
-        current_active_sport_filter = payload.get("filter_key", "ufc")
+        current_active_sport_key = payload.get("sport_key", normalized)
+        current_active_sport_name = payload.get("display_name", normalized.title())
+        current_active_sport_filter = payload.get("filter_key", normalized)
         quota_remaining = payload.get("quota_remaining", quota_remaining)
         quota_used = payload.get("quota_used", quota_used)
         sport_enum_val = payload.get("sport_enum", "ufc")
-        sport_enum = Sport(sport_enum_val)
+        try:
+            sport_enum = Sport(sport_enum_val)
+        except Exception:
+            sport_enum = Sport.UFC
 
         for match in data:
             commence_time = match.get("commence_time", "")
+            # STRICT USER RULE: Exclude test cricket matches
+            if sport_enum == Sport.CRICKET_T20:
+                ht = match.get("home_team", "").lower()
+                at = match.get("away_team", "").lower()
+                st = match.get("sport_title", "").lower()
+                if "test" in ht or "test" in at or "test" in st:
+                    continue
+
             for b in match.get("bookmakers", []):
                 b_name = b.get("key", "").lower()
                 for m in b.get("markets", []):

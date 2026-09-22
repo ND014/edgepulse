@@ -59,6 +59,49 @@ class TestSportsResolution(unittest.TestCase):
         events = {a.get("event_id") for a in web_app.detected_anomalies}
         self.assertTrue(any("Sri Lanka" in e or "West Indies" in e or "Bermuda" in e for e in events))
 
+    def test_cricket_strictly_excludes_test_matches(self):
+        # Test cricket matches MUST be filtered out per strict user rule
+        web_app.load_cached_odds("cricket_t20")
+        for a in web_app.detected_anomalies:
+            self.assertNotIn("test", a.get("event_id", "").lower())
+            self.assertNotIn("test", a.get("selection", "").lower())
+        for eid in web_app.orderbook.get_all_active_event_ids():
+            quotes = web_app.orderbook.get_quotes(eid)
+            if quotes:
+                first_quote = next(iter(quotes.values()))
+                self.assertNotIn("test", first_quote.side_a.lower())
+                self.assertNotIn("test", first_quote.side_b.lower())
+
+    def test_load_cached_all_unified(self):
+        # Loading 'all' loads all 9 sports into unified orderbook
+        loaded = web_app.load_cached_odds("all")
+        self.assertTrue(loaded)
+        self.assertEqual(web_app.current_active_sport_filter, "all")
+        self.assertGreater(len(web_app.detected_anomalies), 100)
+        self.assertGreater(len(web_app.orderbook.get_all_active_event_ids()), 150)
+        
+        # Verify multiple sports are represented in active events
+        sports_present = set()
+        for eid in web_app.orderbook.get_all_active_event_ids():
+            quotes = web_app.orderbook.get_quotes(eid)
+            if quotes:
+                first_quote = next(iter(quotes.values()))
+                sports_present.add(first_quote.sport.value)
+
+        self.assertIn("cricket_t20", sports_present)
+        self.assertIn("tennis", sports_present)
+        self.assertIn("americanfootball", sports_present)
+        self.assertIn("icehockey", sports_present)
+        self.assertIn("soccer_dnb", sports_present)
+        self.assertIn("basketball_nba", sports_present)
+
+    def test_sport_key_to_enum(self):
+        self.assertEqual(web_app.sport_key_to_enum("americanfootball_nfl"), web_app.Sport.AMERICAN_FOOTBALL)
+        self.assertEqual(web_app.sport_key_to_enum("icehockey_nhl"), web_app.Sport.ICE_HOCKEY)
+        self.assertEqual(web_app.sport_key_to_enum("cricket_odi"), web_app.Sport.CRICKET_T20)
+        self.assertEqual(web_app.sport_key_to_enum("cricket_international_t20"), web_app.Sport.CRICKET_T20)
+        self.assertEqual(web_app.sport_key_to_enum("tennis_wta_singapore_open"), web_app.Sport.TENNIS)
+
 
 if __name__ == "__main__":
     unittest.main()
