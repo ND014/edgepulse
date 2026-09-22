@@ -696,6 +696,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
             send_json_response(self, {"status": "success", "logs": logs, "count": len(logs)})
             return
 
+        elif self.path == "/api/admin/users":
+            user = get_current_user_from_request(self)
+            if not user or (user.get("email") or "").strip().lower() != "nitdhans1414@gmail.com":
+                send_json_response(self, {"status": "error", "message": "Unauthorized. Access restricted to administrator (nitdhans1414@gmail.com)."}, 403)
+                return
+            users = db.list_all_users()
+            send_json_response(self, {"status": "success", "users": users, "count": len(users)})
+            return
+
         elif self.path == "/api/state":
             user = get_current_user_from_request(self)
             with state_lock:
