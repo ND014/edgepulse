@@ -111,8 +111,8 @@
           <span id="tracker-pending-badge" class="hidden px-1.5 py-0.2 rounded-full text-[9px] bg-neonGreen/20 text-neonGreen font-bold border border-neonGreen/40">0</span>
         </button>
 
-        <!-- Activity Timelogs Nav Button -->
-        <button id="nav-btn-logs" onclick="openActivityLogsModal()" class="flex items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonYellow p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer shrink-0" title="View SQLite User Activity & Timelogs">
+        <!-- Activity Timelogs Nav Button (Admin Only: nitdhans1414@gmail.com) -->
+        <button id="nav-btn-logs" onclick="openActivityLogsModal()" class="hidden items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonYellow p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-sm cursor-pointer shrink-0" title="View SQLite User Activity & Timelogs (Admin)">
           <svg class="w-3.5 h-3.5 text-neonYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
@@ -1883,6 +1883,17 @@
           navTrackerBtn.classList.remove('hidden');
           navTrackerBtn.classList.add('flex');
         }
+
+        const navLogsBtn = document.getElementById('nav-btn-logs');
+        if (navLogsBtn) {
+          if ((currentUser.email || '').toLowerCase() === 'nitdhans1414@gmail.com') {
+            navLogsBtn.classList.remove('hidden');
+            navLogsBtn.classList.add('flex');
+          } else {
+            navLogsBtn.classList.add('hidden');
+            navLogsBtn.classList.remove('flex');
+          }
+        }
       }
     }
 
@@ -2071,6 +2082,12 @@
       if (navLoginBtn) {
         navLoginBtn.classList.remove('hidden');
         navLoginBtn.classList.add('flex');
+      }
+
+      const navLogsBtn = document.getElementById('nav-btn-logs');
+      if (navLogsBtn) {
+        navLogsBtn.classList.add('hidden');
+        navLogsBtn.classList.remove('flex');
       }
 
       if (pushHistory && window.location.hash !== '#landing') {
@@ -3979,6 +3996,10 @@
     let currentLogFilter = 'all';
 
     function openActivityLogsModal() {
+      if (!currentUser || (currentUser.email || '').toLowerCase() !== 'nitdhans1414@gmail.com') {
+        showToast('Activity logs are restricted to administrator.');
+        return;
+      }
       const modal = document.getElementById('activity-logs-modal');
       if (!modal) return;
       modal.classList.remove('hidden');

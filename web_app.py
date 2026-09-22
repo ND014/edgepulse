@@ -679,6 +679,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
 
         elif self.path.startswith("/api/activity_logs"):
+            user = get_current_user_from_request(self)
+            if not user or (user.get("email") or "").strip().lower() != "nitdhans1414@gmail.com":
+                send_json_response(self, {"status": "error", "message": "Unauthorized. Activity logs are restricted to administrator (nitdhans1414@gmail.com)."}, 403)
+                return
             limit = 100
             if "?" in self.path:
                 query = self.path.split("?", 1)[1]
