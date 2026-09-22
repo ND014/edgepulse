@@ -271,6 +271,13 @@
             <div class="pt-2">
               <div class="text-[10px] font-bold text-emerald-400 tracking-wider uppercase px-2 mb-1">Cricket</div>
               <div class="space-y-1">
+                <button onclick="scanSport('cricket', 'Cricket (All Active - ODI & T20)', 'cricket_t20')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
+                  <div>
+                    <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">All Active Cricket (ODI & T20) <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">ALL MATCHES</span></div>
+                    <div class="text-[10px] text-slate-400">Scan all in-season international & tournament games</div>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+                </button>
                 <button onclick="scanSport('cricket_caribbean_premier_league', 'Cricket (CPL)', 'cricket_t20')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
                   <div>
                     <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">CPL (Caribbean Premier League) <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">IN SEASON NOW</span></div>
@@ -383,17 +390,24 @@
             <div class="pt-2">
               <div class="text-[10px] font-bold text-yellow-300 tracking-wider uppercase px-2 mb-1">Tennis</div>
               <div class="space-y-1">
+                <button onclick="scanSport('tennis', 'Tennis (All Active Tournaments)', 'tennis')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
+                  <div>
+                    <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">All Active Tennis (WTA & ATP) <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">ALL TOURS</span></div>
+                    <div class="text-[10px] text-slate-400">WTA Singapore Open, Grand Slams & ATP Tournaments</div>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+                </button>
+                <button onclick="scanSport('tennis_wta_singapore_open', 'Tennis (WTA Singapore)', 'tennis')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
+                  <div>
+                    <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">WTA Singapore Open <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">IN SEASON NOW</span></div>
+                    <div class="text-[10px] text-slate-400">Active Women's Singles Championship</div>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+                </button>
                 <button onclick="scanSport('tennis_atp', 'Tennis (ATP)', 'tennis')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
                   <div>
                     <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">ATP Tour (Men's)</div>
                     <div class="text-[10px] text-slate-400">Grand Slams & Masters 1000</div>
-                  </div>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
-                </button>
-                <button onclick="scanSport('tennis_wta_guadalajara_open', 'Tennis (WTA)', 'tennis')" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group">
-                  <div>
-                    <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">WTA Tour (Women's)</div>
-                    <div class="text-[10px] text-slate-400">Guadalajara Open & Active Tournaments</div>
                   </div>
                   <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
                 </button>
@@ -680,13 +694,13 @@
             </p>
           </div>
           <div class="flex flex-wrap gap-1.5 pt-1">
-            <button onclick="selectSportFromHub('cricket_caribbean_premier_league', 'Cricket (CPL)', 'cricket_t20')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-emerald-400 hover:text-emerald-400 transition">CPL (T20)</button>
-            <button onclick="selectSportFromHub('cricket_international_t20', 'Cricket (Intl T20)', 'cricket_t20')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-emerald-400 hover:text-emerald-400 transition">ICC Intl T20</button>
+            <button onclick="selectSportFromHub('cricket', 'Cricket (All Active)', 'cricket_t20')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:border-emerald-400 hover:text-white transition">All Active (ODI + T20)</button>
             <button onclick="selectSportFromHub('cricket_odi', 'Cricket (ODI)', 'cricket_t20')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-emerald-400 hover:text-emerald-400 transition">ODI Matches</button>
+            <button onclick="selectSportFromHub('cricket_international_t20', 'Cricket (Intl T20)', 'cricket_t20')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-emerald-400 hover:text-emerald-400 transition">ICC Intl T20</button>
           </div>
         </div>
         <div class="pt-6 mt-2 border-t border-brandBorder/50">
-          <button onclick="selectSportFromHub('cricket_caribbean_premier_league', 'Cricket (CPL)', 'cricket_t20')" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
+          <button onclick="selectSportFromHub('cricket', 'Cricket (ODI & T20)', 'cricket_t20')" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2">
             <span>Launch Cricket Market Board</span>
             <span>→</span>
           </button>
@@ -851,12 +865,13 @@
             </p>
           </div>
           <div class="flex flex-wrap gap-1.5 pt-1">
-            <button onclick="selectSportFromHub('tennis_atp', 'Tennis (ATP)', 'tennis')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-yellow-400 hover:text-yellow-400 transition">ATP Tour (Men)</button>
-            <button onclick="selectSportFromHub('tennis_wta', 'Tennis (WTA)', 'tennis')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-yellow-400 hover:text-yellow-400 transition">WTA (Women)</button>
+            <button onclick="selectSportFromHub('tennis', 'Tennis (All Active)', 'tennis')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-yellow-400/20 border border-yellow-400/40 text-yellow-300 hover:border-yellow-400 hover:text-white transition">All Active Tournaments</button>
+            <button onclick="selectSportFromHub('tennis_wta_singapore_open', 'Tennis (WTA Singapore)', 'tennis')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-yellow-400 hover:text-yellow-400 transition">WTA Singapore Open</button>
+            <button onclick="selectSportFromHub('tennis_atp', 'Tennis (ATP)', 'tennis')" class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-yellow-400 hover:text-yellow-400 transition">ATP Tour</button>
           </div>
         </div>
         <div class="pt-6 mt-2 border-t border-brandBorder/50">
-          <button onclick="selectSportFromHub('tennis_atp', 'Tennis (ATP & WTA)', 'tennis')" class="w-full py-2.5 px-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-yellow-400/20 flex items-center justify-center space-x-2">
+          <button onclick="selectSportFromHub('tennis', 'Tennis (ATP & WTA)', 'tennis')" class="w-full py-2.5 px-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-yellow-400/20 flex items-center justify-center space-x-2">
             <span>Launch Tennis Market Board</span>
             <span>→</span>
           </button>
@@ -1755,9 +1770,10 @@
         <div>
           <h4 class="font-bold text-white uppercase tracking-wider mb-3 text-[11px]">Benchmarked Sports</h4>
           <ul class="space-y-2 text-slate-400">
-            <li><button onclick="selectSportFromHub('cricket_t20', 'Cricket (T20)', 'cricket')" class="hover:text-neonCyan transition cursor-pointer">Cricket (IPL & T20)</button></li>
-            <li><button onclick="selectSportFromHub('soccer_epl', 'Soccer (Premier League)', 'soccer')" class="hover:text-neonCyan transition cursor-pointer">Soccer (EPL & UEFA)</button></li>
-            <li><button onclick="selectSportFromHub('basketball_nba', 'Basketball (NBA)', 'basketball')" class="hover:text-neonCyan transition cursor-pointer">Basketball (NBA)</button></li>
+            <li><button onclick="selectSportFromHub('cricket', 'Cricket (ODI & T20)', 'cricket_t20')" class="hover:text-neonCyan transition cursor-pointer">Cricket (ODI & T20)</button></li>
+            <li><button onclick="selectSportFromHub('tennis', 'Tennis (ATP & WTA)', 'tennis')" class="hover:text-neonCyan transition cursor-pointer">Tennis (ATP & WTA)</button></li>
+            <li><button onclick="selectSportFromHub('soccer_epl', 'Soccer (Premier League)', 'soccer_dnb')" class="hover:text-neonCyan transition cursor-pointer">Soccer (EPL & UEFA)</button></li>
+            <li><button onclick="selectSportFromHub('basketball_nba', 'Basketball (NBA)', 'basketball_nba')" class="hover:text-neonCyan transition cursor-pointer">Basketball (NBA)</button></li>
             <li><button onclick="selectSportFromHub('ufc', 'UFC / MMA', 'ufc')" class="hover:text-neonCyan transition cursor-pointer">UFC / MMA</button></li>
           </ul>
         </div>
@@ -2589,9 +2605,9 @@
       'boxing': { key: 'boxing_boxing', name: 'Boxing', filter: 'boxing' },
       'ufc': { key: 'mma_mixed_martial_arts', name: 'UFC / MMA', filter: 'ufc' },
       'basketball_nba': { key: 'basketball_nba', name: 'Basketball (NBA)', filter: 'basketball_nba' },
-      'cricket_t20': { key: 'cricket_t20', name: 'Cricket (T20)', filter: 'cricket_t20' },
+      'cricket_t20': { key: 'cricket', name: 'Cricket (ODI & T20)', filter: 'cricket_t20' },
       'soccer_dnb': { key: 'soccer_epl', name: 'Soccer (EPL)', filter: 'soccer_dnb' },
-      'tennis': { key: 'tennis_atp', name: 'Tennis (ATP)', filter: 'tennis' },
+      'tennis': { key: 'tennis', name: 'Tennis (ATP & WTA)', filter: 'tennis' },
     };
 
     async function setFilter(sport, switchSportData = true) {

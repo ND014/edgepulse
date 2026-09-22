@@ -77,6 +77,50 @@ CACHE_FILE = CACHE_DIR / "latest.json"
 SPORT_SCAN_COOLDOWN_SECONDS = int(os.environ.get("SPORT_SCAN_COOLDOWN_SECONDS", 300))
 SPORT_LAST_SCAN: Dict[str, float] = {}
 
+ACTIVE_SPORTS_CACHE: Dict[str, Any] = {"timestamp": 0, "sports": []}
+
+def get_active_the_odds_api_sports() -> List[Dict[str, Any]]:
+    """
+    Fetch all active sports from The Odds API (/v4/sports/).
+    Costs 0 API quota! Cached for 10 minutes (600s).
+    """
+    global ACTIVE_SPORTS_CACHE
+    now = time.time()
+    if ACTIVE_SPORTS_CACHE["sports"] and (now - ACTIVE_SPORTS_CACHE["timestamp"]) < 600:
+        return ACTIVE_SPORTS_CACHE["sports"]
+    if not ODDS_API_KEY:
+        return []
+    url = f"https://api.the-odds-api.com/v4/sports/?apiKey={ODDS_API_KEY}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "EdgePulseEngine/1.0", "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                ACTIVE_SPORTS_CACHE = {"timestamp": now, "sports": data}
+                return data
+    except Exception as e:
+        print(f"Notice: Failed to fetch active sports list from The Odds API: {e}")
+    return ACTIVE_SPORTS_CACHE.get("sports", [])
+
+
+def is_match_active_or_upcoming(commence_time_str: str, max_hours_past: float = 12.0) -> bool:
+    """
+    Returns True if match is either upcoming or started recently (within max_hours_past).
+    Filters out matches that concluded in the past (e.g., yesterday's matches).
+    """
+    if not commence_time_str:
+        return True
+    try:
+        from datetime import datetime, timezone
+        clean_str = commence_time_str.replace("Z", "+00:00")
+        match_time = datetime.fromisoformat(clean_str)
+        now = datetime.now(timezone.utc)
+        diff_hours = (now - match_time).total_seconds() / 3600.0
+        return diff_hours <= max_hours_past
+    except Exception:
+        return True
+
+
 SPORT_API_MAP = {
     # Baseball
     "baseball_mlb": ("baseball_mlb", "baseball_npb", Sport.BASEBALL, "Baseball (MLB)", "baseball", "Baseball", "Major League Baseball (USA)"),
@@ -100,11 +144,11 @@ SPORT_API_MAP = {
     "basketball": ("basketball_nba", "basketball_wnba", Sport.BASKETBALL_NBA, "Basketball (NBA)", "basketball_nba", "Basketball", "NBA"),
 
     # Cricket (Active In-Season)
-    "cricket_international_t20": ("cricket_international_t20", "cricket_caribbean_premier_league", Sport.CRICKET_T20, "Cricket (Intl T20)", "cricket_t20", "Cricket", "ICC International Twenty20"),
-    "cricket_caribbean_premier_league": ("cricket_caribbean_premier_league", None, Sport.CRICKET_T20, "Cricket (CPL)", "cricket_t20", "Cricket", "Caribbean Premier League (West Indies)"),
-    "cricket_odi": ("cricket_odi", None, Sport.CRICKET_T20, "Cricket (ODI)", "cricket_t20", "Cricket", "One Day Internationals"),
-    "cricket_t20": ("cricket_international_t20", "cricket_caribbean_premier_league", Sport.CRICKET_T20, "Cricket (T20)", "cricket_t20", "Cricket", "International T20 & CPL"),
-    "cricket": ("cricket_international_t20", "cricket_caribbean_premier_league", Sport.CRICKET_T20, "Cricket (T20)", "cricket_t20", "Cricket", "International T20"),
+    "cricket_odi": ("cricket_odi", "cricket_international_t20", Sport.CRICKET_T20, "Cricket (ODI)", "cricket_t20", "Cricket", "One Day Internationals (50 Over)"),
+    "cricket_international_t20": ("cricket_international_t20", "cricket_odi", Sport.CRICKET_T20, "Cricket (Intl T20)", "cricket_t20", "Cricket", "ICC International Twenty20"),
+    "cricket_caribbean_premier_league": ("cricket_caribbean_premier_league", "cricket_odi", Sport.CRICKET_T20, "Cricket (CPL)", "cricket_t20", "Cricket", "Caribbean Premier League (West Indies)"),
+    "cricket_t20": ("cricket_odi", "cricket_international_t20", Sport.CRICKET_T20, "Cricket (ODI & T20)", "cricket_t20", "Cricket", "International ODI & T20"),
+    "cricket": ("cricket_odi", "cricket_international_t20", Sport.CRICKET_T20, "Cricket (ODI & T20)", "cricket_t20", "Cricket", "International ODI & T20"),
 
     # Cricket (Seasonal Leagues - Auto-ready when in season)
     "cricket_ipl": ("cricket_ipl", None, Sport.CRICKET_T20, "Cricket (IPL)", "cricket_t20", "Cricket", "Indian Premier League (Seasonal: Mar-May)"),
@@ -126,10 +170,10 @@ SPORT_API_MAP = {
     "soccer": ("soccer_epl", "soccer_uefa_champs_league", Sport.SOCCER_DNB, "Soccer (EPL)", "soccer_dnb", "Soccer", "English Premier League"),
 
     # Tennis
-    "tennis_atp": ("tennis_atp", "tennis_wta_guadalajara_open", Sport.TENNIS, "Tennis (ATP)", "tennis", "Tennis", "ATP Tour (Men's)"),
-    "tennis_wta": ("tennis_wta_guadalajara_open", None, Sport.TENNIS, "Tennis (WTA)", "tennis", "Tennis", "WTA Tour (Women's)"),
-    "tennis_wta_guadalajara_open": ("tennis_wta_guadalajara_open", None, Sport.TENNIS, "Tennis (WTA)", "tennis", "Tennis", "WTA Guadalajara Open"),
-    "tennis": ("tennis_atp", "tennis_wta_guadalajara_open", Sport.TENNIS, "Tennis (ATP)", "tennis", "Tennis", "ATP Tour"),
+    "tennis_wta_singapore_open": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (WTA Singapore)", "tennis", "Tennis", "WTA Singapore Open"),
+    "tennis_atp": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (ATP Tour)", "tennis", "Tennis", "ATP Tour (Men's)"),
+    "tennis_wta": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (WTA Tour)", "tennis", "Tennis", "WTA Tour (Women's)"),
+    "tennis": ("tennis_wta_singapore_open", None, Sport.TENNIS, "Tennis (ATP & WTA)", "tennis", "Tennis", "Active Tennis Tournaments"),
 }
 
 
@@ -193,9 +237,8 @@ def clear_board_state():
 
 def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = False):
     """
-    Fetch live odds for exactly ONE sport league (strictly 1 API call).
-    Applies per-sport cooldown so refreshing the same sport uses the fresh cache,
-    while allowing users to freely scan different sports back-to-back.
+    Fetch live odds for a sport with dynamic league discovery, multi-league aggregation,
+    cooldown management, and automatic filtering of concluded matches.
     """
     global quota_remaining, quota_used, current_active_sport_name, current_active_sport_filter, current_active_sport_key
 
@@ -213,7 +256,6 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
 
     # 1. Per-Sport Cooldown: If this specific sport was scanned within the cooldown window, serve fresh cache
     if not force and elapsed < SPORT_SCAN_COOLDOWN_SECONDS:
-        # If this sport is not currently loaded in memory or has 0 anomalies, load it from cache
         if current_active_sport_filter != filter_key or len(detected_anomalies) == 0:
             load_cached_odds(filter_key)
         remaining = int(SPORT_SCAN_COOLDOWN_SECONDS - elapsed)
@@ -266,155 +308,180 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
             "message": f"Active market board loaded from cache.",
         }
 
-    if clear_old:
-        clear_board_state()
+    # 4. Dynamic League Resolution via /v4/sports/ (0 quota)
+    active_sports = get_active_the_odds_api_sports()
+    active_keys = [s.get("key") for s in active_sports if s.get("active") and not s.get("has_outrights")]
 
-    url = (
-        f"https://api.the-odds-api.com/v4/sports/{primary_key}/odds/"
-        f"?apiKey={ODDS_API_KEY}&regions=us,us2,uk,eu,au&markets=h2h&oddsFormat=american"
-    )
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "EdgePulseEngine/1.0", "Accept": "application/json"},
-    )
+    target_leagues = [primary_key]
+    if sport_key in ("cricket", "cricket_t20"):
+        cricket_active = [k for k in active_keys if k.startswith("cricket_")]
+        if cricket_active:
+            target_leagues = cricket_active
+        else:
+            target_leagues = ["cricket_odi", "cricket_international_t20"]
+    elif sport_key in ("tennis", "tennis_atp", "tennis_wta"):
+        tennis_active = [k for k in active_keys if k.startswith("tennis_")]
+        if tennis_active:
+            target_leagues = tennis_active
+        else:
+            target_leagues = ["tennis_wta_singapore_open"]
+    elif primary_key not in active_keys and active_keys:
+        if fallback_key and fallback_key in active_keys:
+            target_leagues = [fallback_key]
+        else:
+            prefix = primary_key.split("_")[0] + "_"
+            matching = [k for k in active_keys if k.startswith(prefix)]
+            if matching:
+                target_leagues = [matching[0]]
 
-    total_fetched = 0
-    league_used = primary_key
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            if resp.status == 200:
-                quota_rem = resp.headers.get("x-requests-remaining")
-                quota_u = resp.headers.get("x-requests-used")
-                if quota_rem is not None:
-                    quota_remaining = int(quota_rem)
-                if quota_u is not None:
-                    quota_used = int(quota_u)
+    # 5. Fetch live odds for target leagues
+    combined_matches = []
+    api_calls_made = 0
+    leagues_used = []
 
-                data = json.loads(resp.read().decode("utf-8"))
+    for l_key in target_leagues:
+        url = (
+            f"https://api.the-odds-api.com/v4/sports/{l_key}/odds/"
+            f"?apiKey={ODDS_API_KEY}&regions=us,us2,uk,eu,au&markets=h2h&oddsFormat=american"
+        )
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "EdgePulseEngine/1.0", "Accept": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status == 200:
+                    quota_rem = resp.headers.get("x-requests-remaining")
+                    quota_u = resp.headers.get("x-requests-used")
+                    if quota_rem is not None:
+                        quota_remaining = int(quota_rem)
+                    if quota_u is not None:
+                        quota_used = int(quota_u)
+                    league_data = json.loads(resp.read().decode("utf-8"))
+                    # Filter out matches that concluded >12 hours ago
+                    valid_matches = [
+                        m for m in league_data
+                        if is_match_active_or_upcoming(m.get("commence_time", ""), max_hours_past=12.0)
+                    ]
+                    combined_matches.extend(valid_matches)
+                    api_calls_made += 1
+                    leagues_used.append(l_key)
+        except Exception as le:
+            print(f"Notice: Live feed error for {l_key}: {le}")
 
-                # If primary league has 0 matches and fallback exists, try fallback
-                if len(data) == 0 and fallback_key:
-                    fallback_url = (
-                        f"https://api.the-odds-api.com/v4/sports/{fallback_key}/odds/"
-                        f"?apiKey={ODDS_API_KEY}&regions=us,us2,uk,eu,au&markets=h2h&oddsFormat=american"
-                    )
-                    req_fb = urllib.request.Request(
-                        fallback_url,
-                        headers={"User-Agent": "EdgePulseEngine/1.0", "Accept": "application/json"},
-                    )
-                    with urllib.request.urlopen(req_fb, timeout=10) as resp_fb:
-                        if resp_fb.status == 200:
-                            data = json.loads(resp_fb.read().decode("utf-8"))
-                            league_used = fallback_key
-
-                # Save fetched data to local cache so restarts don't burn API quota
-                try:
-                    cache_payload = {
-                        "sport_key": sport_key,
-                        "league_used": league_used,
-                        "display_name": display_name,
-                        "filter_key": filter_key,
-                        "sport_enum": sport_enum.value,
-                        "quota_remaining": quota_remaining,
-                        "quota_used": quota_used,
-                        "data": data,
-                        "cached_at": time.time(),
-                    }
-                    sport_cache_file = CACHE_DIR / f"cache_{filter_key}.json"
-                    with open(sport_cache_file, "w", encoding="utf-8") as scf:
-                        json.dump(cache_payload, scf)
-                    with open(CACHE_FILE, "w", encoding="utf-8") as cf:
-                        json.dump(cache_payload, cf)
-                except Exception as ce:
-                    print(f"Error writing cache: {ce}")
-
-                # Record successful live scan timestamp for this specific sport
-                SPORT_LAST_SCAN[filter_key] = time.time()
-
-                for match in data:
-                    commence_time = match.get("commence_time", "")
-                    for b in match.get("bookmakers", []):
-                        b_name = b.get("key", "").lower()
-                        for m in b.get("markets", []):
-                            if m.get("key") == "h2h":
-                                outcomes = m.get("outcomes", [])
-                                if len(outcomes) == 2:
-                                    q = OddsQuote(
-                                        event_id="",
-                                        sport=sport_enum,
-                                        market_type=MarketType.HEAD_TO_HEAD,
-                                        bookmaker=b_name,
-                                        side_a=outcomes[0]["name"],
-                                        side_b=outcomes[1]["name"],
-                                        side_a_odds=float(outcomes[0]["price"]),
-                                        side_b_odds=float(outcomes[1]["price"]),
-                                        odds_format=OddsFormat.AMERICAN,
-                                        timestamp=time.time(),
-                                        commence_time=commence_time,
-                                    )
-                                    process_quote(q, is_live=True)
-                                    total_fetched += 1
-                                elif len(outcomes) == 3 and sport_enum == Sport.SOCCER_DNB:
-                                    # Convert 3-way regulation soccer into Draw No Bet (DNB)
-                                    draw_outcome = None
-                                    non_draw = []
-                                    for oc in outcomes:
-                                        if oc.get("name", "").strip().lower() in ("draw", "tie"):
-                                             draw_outcome = oc
-                                        else:
-                                             non_draw.append(oc)
-                                    if len(non_draw) == 2 and draw_outcome:
-                                        try:
-                                            from src.math_engine import american_to_decimal, decimal_to_american
-                                            dec_draw = american_to_decimal(float(draw_outcome["price"]))
-                                            if dec_draw > 1.01:
-                                                dnb_factor = 1.0 - (1.0 / dec_draw)
-                                                dec_a = american_to_decimal(float(non_draw[0]["price"])) * dnb_factor
-                                                dec_b = american_to_decimal(float(non_draw[1]["price"])) * dnb_factor
-                                                if dec_a > 1.01 and dec_b > 1.01:
-                                                    q = OddsQuote(
-                                                        event_id="",
-                                                        sport=sport_enum,
-                                                        market_type=MarketType.DRAW_NO_BET,
-                                                        bookmaker=b_name,
-                                                        side_a=non_draw[0]["name"],
-                                                        side_b=non_draw[1]["name"],
-                                                        side_a_odds=float(decimal_to_american(dec_a)),
-                                                        side_b_odds=float(decimal_to_american(dec_b)),
-                                                        odds_format=OddsFormat.AMERICAN,
-                                                        timestamp=time.time(),
-                                                        commence_time=commence_time,
-                                                    )
-                                                    process_quote(q, is_live=True)
-                                                    total_fetched += 1
-                                        except Exception:
-                                            pass
-    except Exception as e:
-        print(f"Notice: Live feed error for {primary_key}: {e}. Serving cached orderbook.")
+    # Fallback to cache if no matches returned or all failed
+    if not combined_matches:
+        print(f"Notice: No active matches returned for {target_leagues}. Serving cached orderbook.")
         load_cached_odds(filter_key)
         return {
             "status": "success",
             "cached": True,
             "fallback": True,
             "sport": display_name,
-            "league": league_used,
+            "league": ", ".join(target_leagues),
             "sport_filter": filter_key,
             "quotes_fetched": len(detected_anomalies),
             "quota_remaining": quota_remaining,
             "quota_used": quota_used,
-            "api_calls_used": 0,
+            "api_calls_used": api_calls_made,
             "message": f"Loaded {display_name} orderbook from cache.",
         }
+
+    if clear_old:
+        clear_board_state()
+
+    # Save merged data to cache files
+    try:
+        cache_payload = {
+            "sport_key": sport_key,
+            "league_used": ", ".join(leagues_used),
+            "display_name": display_name,
+            "filter_key": filter_key,
+            "sport_enum": sport_enum.value,
+            "quota_remaining": quota_remaining,
+            "quota_used": quota_used,
+            "data": combined_matches,
+            "cached_at": time.time(),
+        }
+        sport_cache_file = CACHE_DIR / f"cache_{filter_key}.json"
+        with open(sport_cache_file, "w", encoding="utf-8") as scf:
+            json.dump(cache_payload, scf)
+        with open(CACHE_FILE, "w", encoding="utf-8") as cf:
+            json.dump(cache_payload, cf)
+    except Exception as ce:
+        print(f"Error writing cache: {ce}")
+
+    SPORT_LAST_SCAN[filter_key] = time.time()
+
+    # Ingest quotes
+    total_fetched = 0
+    for match in combined_matches:
+        commence_time = match.get("commence_time", "")
+        for b in match.get("bookmakers", []):
+            b_name = b.get("key", "").lower()
+            for m in b.get("markets", []):
+                if m.get("key") == "h2h":
+                    outcomes = m.get("outcomes", [])
+                    if len(outcomes) == 2:
+                        q = OddsQuote(
+                            event_id="",
+                            sport=sport_enum,
+                            market_type=MarketType.HEAD_TO_HEAD,
+                            bookmaker=b_name,
+                            side_a=outcomes[0]["name"],
+                            side_b=outcomes[1]["name"],
+                            side_a_odds=float(outcomes[0]["price"]),
+                            side_b_odds=float(outcomes[1]["price"]),
+                            odds_format=OddsFormat.AMERICAN,
+                            timestamp=time.time(),
+                            commence_time=commence_time,
+                        )
+                        process_quote(q, is_live=True)
+                        total_fetched += 1
+                    elif len(outcomes) == 3 and sport_enum == Sport.SOCCER_DNB:
+                        draw_outcome = None
+                        non_draw = []
+                        for oc in outcomes:
+                            if oc.get("name", "").strip().lower() in ("draw", "tie"):
+                                draw_outcome = oc
+                            else:
+                                non_draw.append(oc)
+                        if len(non_draw) == 2 and draw_outcome:
+                            try:
+                                from src.math_engine import american_to_decimal, decimal_to_american
+                                dec_draw = american_to_decimal(float(draw_outcome["price"]))
+                                if dec_draw > 1.01:
+                                    dnb_factor = 1.0 - (1.0 / dec_draw)
+                                    dec_a = american_to_decimal(float(non_draw[0]["price"])) * dnb_factor
+                                    dec_b = american_to_decimal(float(non_draw[1]["price"])) * dnb_factor
+                                    if dec_a > 1.01 and dec_b > 1.01:
+                                        q = OddsQuote(
+                                            event_id="",
+                                            sport=sport_enum,
+                                            market_type=MarketType.DRAW_NO_BET,
+                                            bookmaker=b_name,
+                                            side_a=non_draw[0]["name"],
+                                            side_b=non_draw[1]["name"],
+                                            side_a_odds=float(decimal_to_american(dec_a)),
+                                            side_b_odds=float(decimal_to_american(dec_b)),
+                                            odds_format=OddsFormat.AMERICAN,
+                                            timestamp=time.time(),
+                                            commence_time=commence_time,
+                                        )
+                                        process_quote(q, is_live=True)
+                                        total_fetched += 1
+                            except Exception:
+                                pass
 
     return {
         "status": "success",
         "sport": display_name,
-        "league": league_used,
+        "league": ", ".join(leagues_used),
         "sport_filter": filter_key,
         "quotes_fetched": total_fetched,
         "quota_remaining": quota_remaining,
         "quota_used": quota_used,
-        "api_calls_used": 1,
+        "api_calls_used": api_calls_made,
     }
 
 
@@ -435,9 +502,14 @@ def load_cached_odds(target_filter="ufc"):
     alias_map = {
         "basketball": "basketball_nba",
         "cricket": "cricket_t20",
+        "cricket_odi": "cricket_t20",
+        "cricket_international_t20": "cricket_t20",
         "soccer": "soccer_dnb",
         "mma": "ufc",
         "mma_mixed_martial_arts": "ufc",
+        "tennis_atp": "tennis",
+        "tennis_wta": "tennis",
+        "tennis_wta_singapore_open": "tennis",
     }
     normalized = alias_map.get(target_filter, target_filter)
     target_file = CACHE_DIR / f"cache_{normalized}.json"
@@ -455,9 +527,17 @@ def load_cached_odds(target_filter="ufc"):
     try:
         with open(target_file, "r", encoding="utf-8") as cf:
             payload = json.load(cf)
-        data = payload.get("data", [])
-        if not data:
+        raw_data = payload.get("data", [])
+        if not raw_data:
             return False
+
+        # Filter out matches that concluded >12 hours ago
+        data = [
+            m for m in raw_data
+            if is_match_active_or_upcoming(m.get("commence_time", ""), max_hours_past=12.0)
+        ]
+        if not data:
+            data = raw_data
 
         clear_board_state()
         current_active_sport_key = payload.get("sport_key", "mma_mixed_martial_arts")
