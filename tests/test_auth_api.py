@@ -9,6 +9,9 @@ class TestAuthAPI(unittest.TestCase):
     def setUp(self):
         db.init_db()
 
+    def tearDown(self):
+        db.clear_all_users()
+
     def test_signup_login_flow(self):
         # We can test the underlying db methods and json serialization
         email = f"api_test_{int(time.time() * 1000)}@test.com"
@@ -221,6 +224,27 @@ class TestProfileHTTPIntegration(unittest.TestCase):
             login_res = json.loads(resp.read().decode("utf-8"))
             self.assertEqual(login_res["status"], "success")
             self.assertEqual(login_res["user"]["name"], "Sharpshooter Pro")
+
+    def test_admin_clear_users_endpoint(self):
+        # 1. Calling clear_users without secret should fail (403)
+        req_unauth = Request(f"http://127.0.0.1:{self.port}/api/admin/clear_users", method="POST")
+        try:
+            with urlopen(req_unauth) as resp:
+                self.assertNotEqual(resp.status, 200)
+        except Exception as e:
+            self.assertIn("403", str(e))
+
+        # 2. Calling with secret key should succeed
+        req_auth = Request(
+            f"http://127.0.0.1:{self.port}/api/admin/clear_users?secret=edgepulse_wipe_2026",
+            method="POST",
+            headers={"Content-Type": "application/json"}
+        )
+        with urlopen(req_auth) as resp:
+            self.assertEqual(resp.status, 200)
+            res = json.loads(resp.read().decode("utf-8"))
+            self.assertEqual(res["status"], "success")
+            self.assertIn("All user data successfully wiped", res["message"])
 
 
 if __name__ == '__main__':

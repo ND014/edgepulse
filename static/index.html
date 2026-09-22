@@ -1288,7 +1288,7 @@
 
       <div id="tracker-chart-container" class="w-full h-64 bg-brandDark/90 border border-brandBorder/80 rounded-xl p-3 flex items-center justify-center relative overflow-hidden select-none">
         <div id="tracker-chart-empty" class="text-xs font-mono text-slate-500 text-center">
-          Settle bets to generate your real-time bankroll equity curve.
+          Track bets from the dashboard to generate your real-time performance and equity curve.
         </div>
         <svg id="tracker-chart-svg" class="w-full h-full hidden cursor-crosshair" preserveAspectRatio="none" viewBox="0 0 800 220"></svg>
         
@@ -2210,25 +2210,39 @@
           showSportsHomeView();
           fetchState();
         } else {
-          alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
-          if (currentAuthTab === 'login') {
+          const msg = data.message || '';
+          if (msg.toLowerCase().includes('google')) {
+            alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-amber-950/80 text-amber-200 border border-amber-500/60 block';
             alertEl.innerHTML = `
-              <div>${data.message || 'Invalid email or password.'}</div>
+              <div class="font-bold flex items-center gap-1.5 text-amber-300">
+                <span>⚠️ Google Account Detected</span>
+              </div>
+              <div class="mt-1">${msg}</div>
+              <div class="mt-2.5 pt-2 border-t border-amber-800/60 text-[11px] text-slate-300">
+                Please click the <strong class="text-white">"Continue with Google"</strong> button below to sign in directly.
+              </div>
+            `;
+          } else if (currentAuthTab === 'login') {
+            alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
+            alertEl.innerHTML = `
+              <div>${msg || 'Invalid email or password.'}</div>
               <div class="mt-2 pt-2 border-t border-rose-800/60 flex items-center justify-between text-[11px]">
                 <span class="text-slate-300">Don't have an account yet?</span>
                 <button type="button" onclick="setAuthTab('signup')" class="text-neonCyan font-bold underline hover:text-white ml-2">Create Account →</button>
               </div>
             `;
-          } else if (currentAuthTab === 'signup' && (data.message || '').includes('already exists')) {
+          } else if (currentAuthTab === 'signup' && (msg.includes('already exists') || msg.includes('sign in'))) {
+            alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
             alertEl.innerHTML = `
-              <div>${data.message}</div>
+              <div>${msg}</div>
               <div class="mt-2 pt-2 border-t border-rose-800/60 flex items-center justify-between text-[11px]">
                 <span class="text-slate-300">Already have an account?</span>
                 <button type="button" onclick="setAuthTab('login')" class="text-neonCyan font-bold underline hover:text-white ml-2">Sign In here →</button>
               </div>
             `;
           } else {
-            alertEl.innerText = data.message || 'Authentication failed.';
+            alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
+            alertEl.innerText = msg || 'Authentication failed.';
           }
         }
       } catch (err) {
@@ -2273,8 +2287,23 @@
           fetchState();
         } else {
           if (alertEl) {
-            alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
-            alertEl.innerText = data.message || 'Google sign in failed.';
+            const msg = data.message || 'Google sign in failed.';
+            if (msg.toLowerCase().includes('password')) {
+              alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-amber-950/80 text-amber-200 border border-amber-500/60 block';
+              alertEl.innerHTML = `
+                <div class="font-bold flex items-center gap-1.5 text-amber-300">
+                  <span>🔒 Password Account Detected</span>
+                </div>
+                <div class="mt-1">${msg}</div>
+                <div class="mt-2.5 pt-2 border-t border-amber-800/60 flex items-center justify-between text-[11px]">
+                  <span class="text-slate-300">Use email & password to sign in:</span>
+                  <button type="button" onclick="setAuthTab('login')" class="text-neonCyan font-bold underline hover:text-white ml-2">Sign In with Password →</button>
+                </div>
+              `;
+            } else {
+              alertEl.className = 'mb-4 p-3 rounded-xl text-xs font-mono bg-rose-950/70 text-rose-300 border border-rose-600/50 block';
+              alertEl.innerText = msg;
+            }
           }
         }
       } catch (err) {
@@ -4610,9 +4639,14 @@
       const strokeColor = lastPnl >= 0 ? '#10B981' : '#F43F5E';
       const fillColor = lastPnl >= 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)';
 
-      const dotsHtml = points.map((pt, i) => `
-        <circle cx="${getX(i)}" cy="${getY(pnls[i])}" r="4.5" fill="${strokeColor}" stroke="#0F172A" stroke-width="2" class="pointer-events-none" />
-      `).join('');
+      const dotsHtml = points.map((pt, i) => {
+        let dotColor = '#94A3B8';
+        if (pt.result === 'won') dotColor = '#10B981';
+        else if (pt.result === 'lost') dotColor = '#F43F5E';
+        else if (pt.result === 'pending') dotColor = '#F59E0B';
+        else if (i === 0) dotColor = '#38BDF8';
+        return `<circle cx="${getX(i)}" cy="${getY(pnls[i])}" r="4.5" fill="${dotColor}" stroke="#0F172A" stroke-width="2" class="pointer-events-none" />`;
+      }).join('');
 
       svg.innerHTML = `
         <!-- Y-Axis Grid Lines & Numbers -->
@@ -4691,7 +4725,9 @@
       // Show and update active dot
       activeDot.setAttribute('cx', ptX);
       activeDot.setAttribute('cy', ptY);
-      activeDot.setAttribute('fill', pnl >= 0 ? '#10B981' : '#F43F5E');
+      const isPending = pt.result === 'pending';
+      const activeColor = isPending ? '#F59E0B' : (pnl >= 0 ? '#10B981' : '#F43F5E');
+      activeDot.setAttribute('fill', activeColor);
       activeDot.classList.remove('hidden');
 
       // Delta from previous bet
@@ -4708,7 +4744,41 @@
         dateStr = new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       }
 
-      const resultBadge = pt.result ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${pt.result === 'won' ? 'bg-neonGreen/20 text-neonGreen border border-neonGreen/30' : (pt.result === 'lost' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-700 text-slate-300')} uppercase">${pt.result}</span>` : '';
+      const resultBadge = pt.result ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${
+        pt.result === 'won' ? 'bg-neonGreen/20 text-neonGreen border border-neonGreen/30' :
+        pt.result === 'lost' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+        pt.result === 'pending' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse' :
+        'bg-slate-700 text-slate-300'
+      } uppercase">${pt.result}</span>` : '';
+
+      let bodySection = '';
+      if (isPending) {
+        bodySection = `
+          <div class="flex justify-between items-center text-[10px]">
+            <span class="text-slate-400">Stake:</span>
+            <span class="font-bold text-white">$${(pt.stake || 0).toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between items-center text-[10px]">
+            <span class="text-slate-400">Potential Return:</span>
+            <span class="font-bold text-neonGreen">+$${(pt.potential_profit || 0).toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-700/60">
+            <span class="text-slate-400">Status:</span>
+            <span class="font-bold text-amber-400">In Play / Open</span>
+          </div>
+        `;
+      } else {
+        bodySection = `
+          <div class="flex justify-between items-center text-[10px]">
+            <span class="text-slate-400">Bet P&L:</span>
+            ${deltaStr}
+          </div>
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-slate-400">Cumulative:</span>
+            <span class="font-bold ${pnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}">${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toFixed(2)}</span>
+          </div>
+        `;
+      }
 
       tooltip.innerHTML = closestIdx === 0 ? `
         <div class="font-bold text-white text-[11px]">Starting Baseline</div>
@@ -4720,16 +4790,10 @@
           ${resultBadge}
         </div>
         <div class="font-bold text-white text-[11px] truncate max-w-[180px]">${pt.event || 'Matchup'}</div>
+        ${pt.selection ? `<div class="text-[10px] text-neonCyan truncate max-w-[180px]">${pt.selection}</div>` : ''}
         ${dateStr ? `<div class="text-[9px] text-slate-400">${dateStr}</div>` : ''}
         <div class="pt-1.5 border-t border-slate-700/60 space-y-0.5">
-          <div class="flex justify-between items-center text-[10px]">
-            <span class="text-slate-400">Bet P&L:</span>
-            ${deltaStr}
-          </div>
-          <div class="flex justify-between items-center text-xs">
-            <span class="text-slate-400">Cumulative:</span>
-            <span class="font-bold ${pnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}">${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toFixed(2)}</span>
-          </div>
+          ${bodySection}
         </div>
       `;
 
@@ -4766,6 +4830,12 @@
         lastStateData = state;
         renderState(state);
         updateConnectionStatus('connected');
+
+        // Keep tracker bets and equity curve live when on tracker view
+        const trackerView = document.getElementById('tracker-view');
+        if (trackerView && !trackerView.classList.contains('hidden') && currentUser) {
+          loadUserBets();
+        }
       } catch (err) {
         updateConnectionStatus('connecting');
       }

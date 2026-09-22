@@ -6,6 +6,9 @@ class TestDatabaseAuth(unittest.TestCase):
     def setUp(self):
         db.init_db()
 
+    def tearDown(self):
+        db.clear_all_users()
+
     def test_user_creation_and_auth(self):
         email = f"user_{int(time.time() * 1000)}@test.com"
         u = db.create_user(email, "MyStrongPassword123!", "Alice Tester")
@@ -241,6 +244,78 @@ class TestDatabaseAuth(unittest.TestCase):
         # Triggering backup worker should not raise any unhandled exceptions
         db.trigger_gcs_backup(delay_seconds=0.01)
         time.sleep(0.05)
+
+    def test_pending_bets_in_equity_curve(self):
+        ts = int(time.time() * 1000)
+        u = db.create_user(f"pending_curve_{ts}@test.com", "Password123!")
+        uid = u["id"]
+        # Place a pending bet
+        b = db.log_bet(uid, "test_ev_1", "tennis", "Player A vs Player B", "Player A", "betonline", 2.50, 50.0)
+        stats = db.get_bet_performance_stats(uid)
+        self.assertEqual(stats["total_bets"], 1)
+        self.assertEqual(stats["pending_count"], 1)
+        self.assertEqual(len(stats["equity_curve"]), 1)
+        pt = stats["equity_curve"][0]
+        self.assertEqual(pt["result"], "pending")
+        self.assertEqual(pt["stake"], 50.0)
+        self.assertEqual(pt["potential_profit"], 75.0)
+        self.assertEqual(pt["cumulative_pnl"], 0.0)
+
+        # Now settle as won
+        db.settle_bet(b["id"], uid, "won")
+        stats_won = db.get_bet_performance_stats(uid)
+        self.assertEqual(stats_won["won_count"], 1)
+        self.assertEqual(stats_won["total_profit"], 75.0)
+        self.assertEqual(stats_won["equity_curve"][0]["result"], "won")
+        self.assertEqual(stats_won["equity_curve"][0]["delta"], 75.0)
+
+    def test_cross_auth_exclusivity_messages(self):
+        ts = int(time.time() * 1000)
+        g_email = f"google_exclusive_{ts}@gmail.com"
+        g_sub = f"sub_exclusive_{ts}"
+        db.upsert_google_user(g_sub, g_email, "Google Exclusive")
+
+        # 1. Attempt signup with password using Google email
+        with self.assertRaises(ValueError) as ctx1:
+            db.create_user(g_email, "Password123!")
+        self.assertIn("registered using Google", str(ctx1.exception))
+
+        # 2. Attempt login with password using Google email
+        with self.assertRaises(ValueError) as ctx2:
+            db.authenticate_user(g_email, "Password123!")
+        self.assertIn("created with Google", str(ctx2.exception))
+
+        # 3. Create password user
+        p_email = f"pass_exclusive_{ts}@example.com"
+        db.create_user(p_email, "Password123!")
+
+        # 4. Attempt duplicate password signup
+        with self.assertRaises(ValueError) as ctx3:
+            db.create_user(p_email, "AnotherPass456!")
+        self.assertIn("already exists", str(ctx3.exception))
+
+        # 5. Attempt Google sign-in using password email
+        with self.assertRaises(ValueError) as ctx4:
+            db.upsert_google_user(f"fake_sub_{ts}", p_email, "Imposter")
+        self.assertIn("created with a password", str(ctx4.exception))
+
+    def test_thorough_clear_all_users(self):
+        ts = int(time.time() * 1000)
+        u = db.create_user(f"temp_user_{ts}@test.com", "Password123!")
+        db.create_session(u["id"])
+        db.log_bet(u["id"], "ev_temp", "tennis", "A vs B", "A", "book", 2.0, 10.0)
+        db.log_activity("tennis", "Tennis", "view_sport", user_id=u["id"], user_email=u["email"])
+
+        count = db.clear_all_users()
+        self.assertGreaterEqual(count, 1)
+
+        conn = db.get_connection()
+        try:
+            for tbl in ["users", "sessions", "bets", "activity_logs"]:
+                row_count = conn.execute(f"SELECT count(*) FROM {tbl};").fetchone()[0]
+                self.assertEqual(row_count, 0, f"Table {tbl} should be empty after clear_all_users")
+        finally:
+            conn.close()
 
 
 if __name__ == '__main__':

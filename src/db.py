@@ -132,6 +132,9 @@ def get_connection() -> sqlite3.Connection:
 def init_db():
     """Create database tables and indexes if they do not already exist."""
     restore_from_gcs()
+    if os.environ.get("CLEAR_DB_ON_BOOT") == "1":
+        print("[EdgePulse DB] CLEAR_DB_ON_BOOT=1 detected. Wiping all user data on boot...")
+        clear_all_users()
     conn = get_connection()
     try:
         with conn:
@@ -283,9 +286,9 @@ def create_user(
         existing = conn.execute("SELECT * FROM users WHERE email = ?", (email_clean,)).fetchone()
         if existing:
             if existing["auth_provider"] == "google":
-                raise ValueError("An account with this email was created with Google. Please use 'Continue with Google' to sign in.")
+                raise ValueError("This email is already registered using Google. Please sign in using 'Continue with Google'.")
             else:
-                raise ValueError("An account with this email already exists. Please sign in.")
+                raise ValueError("An account with this email already exists. Please sign in using your password.")
 
         with conn:
             cursor = conn.execute(
@@ -327,9 +330,12 @@ def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
         if not row:
             return None
 
-        # If user registered with Google and has no local password
-        if row["auth_provider"] == "google" and not row["password_hash"]:
+        # If user registered with Google
+        if row["auth_provider"] == "google":
             raise ValueError("This account was created with Google. Please use 'Continue with Google' to sign in.")
+
+        if row["auth_provider"] == "guest":
+            raise ValueError("This is a temporary guest account. Please create a new account to continue.")
 
         if not row["password_hash"] or not row["salt"]:
             return None
@@ -819,9 +825,24 @@ def get_bet_performance_stats(user_id: int) -> Dict[str, Any]:
             stk = float(r["stake"])
             total_staked += stk
             st = r["status"]
+            odds = float(r["odds"]) if r["odds"] else 1.0
 
             if st == "pending":
                 pending_count += 1
+                pot_profit = round((odds - 1.0) * stk, 2)
+                equity_curve.append({
+                    "time": r["placed_at"],
+                    "profit": round(cumulative_profit, 2),
+                    "cumulative_pnl": round(cumulative_profit, 2),
+                    "delta": 0.0,
+                    "event": r["event_name"],
+                    "selection": r["selection"],
+                    "sportsbook": r["sportsbook"],
+                    "stake": stk,
+                    "odds": odds,
+                    "potential_profit": pot_profit,
+                    "result": "pending",
+                })
             elif st == "won":
                 won_count += 1
                 settled_staked += stk
@@ -832,7 +853,13 @@ def get_bet_performance_stats(user_id: int) -> Dict[str, Any]:
                     "time": r["settled_at"] or r["placed_at"],
                     "profit": round(cumulative_profit, 2),
                     "cumulative_pnl": round(cumulative_profit, 2),
+                    "delta": prf,
                     "event": r["event_name"],
+                    "selection": r["selection"],
+                    "sportsbook": r["sportsbook"],
+                    "stake": stk,
+                    "odds": odds,
+                    "potential_profit": 0.0,
                     "result": "won",
                 })
             elif st == "lost":
@@ -845,7 +872,13 @@ def get_bet_performance_stats(user_id: int) -> Dict[str, Any]:
                     "time": r["settled_at"] or r["placed_at"],
                     "profit": round(cumulative_profit, 2),
                     "cumulative_pnl": round(cumulative_profit, 2),
+                    "delta": prf,
                     "event": r["event_name"],
+                    "selection": r["selection"],
+                    "sportsbook": r["sportsbook"],
+                    "stake": stk,
+                    "odds": odds,
+                    "potential_profit": 0.0,
                     "result": "lost",
                 })
             elif st in ("push", "void"):
@@ -855,7 +888,13 @@ def get_bet_performance_stats(user_id: int) -> Dict[str, Any]:
                     "time": r["settled_at"] or r["placed_at"],
                     "profit": round(cumulative_profit, 2),
                     "cumulative_pnl": round(cumulative_profit, 2),
+                    "delta": 0.0,
                     "event": r["event_name"],
+                    "selection": r["selection"],
+                    "sportsbook": r["sportsbook"],
+                    "stake": stk,
+                    "odds": odds,
+                    "potential_profit": 0.0,
                     "result": "push",
                 })
 
@@ -899,13 +938,18 @@ def list_all_users() -> list[Dict[str, Any]]:
 
 
 def clear_all_users() -> int:
-    """Clear all records from users and sessions tables."""
+    """Clear all records from users, sessions, bets, and activity_logs tables."""
     conn = get_connection()
     try:
         with conn:
             conn.execute("DELETE FROM sessions;")
+            conn.execute("DELETE FROM bets;")
+            conn.execute("DELETE FROM activity_logs;")
             cursor = conn.execute("DELETE FROM users;")
-            return cursor.rowcount
+            conn.execute("DELETE FROM sqlite_sequence WHERE name IN ('users', 'sessions', 'bets', 'activity_logs');")
+            deleted_count = cursor.rowcount
+        trigger_gcs_backup()
+        return deleted_count
     finally:
         conn.close()
 
