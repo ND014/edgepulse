@@ -29,19 +29,45 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 
-    window.currencySym = localStorage.getItem('user_currency') || '$';
+        window.currencySym = localStorage.getItem('user_currency') || '$';
 
+    const EXCHANGE_RATES = {
+      '$': 1.0,
+      '₹': 83.5,
+      '€': 0.92,
+      '£': 0.79,
+      'A$': 1.51,
+      'C$': 1.36
+    };
+
+    function getRate() {
+      return EXCHANGE_RATES[window.currencySym] || 1.0;
+    }
+
+    function fmtCur(usdVal, decimals=2) {
+      return window.currencySym + (usdVal * getRate()).toFixed(decimals);
+    }
+
+
+    
     function changeCurrency(val) {
       window.currencySym = val;
       localStorage.setItem('user_currency', val);
       document.querySelectorAll('.currency-sym').forEach(el => el.innerText = val);
+      
+      const bankrollInput = document.getElementById('drawer-input-bankroll');
+      if (bankrollInput && typeof currentUser !== 'undefined' && currentUser && currentUser.bankroll) {
+        bankrollInput.value = (currentUser.bankroll * getRate()).toFixed(0);
+      }
+
       if (typeof renderState === 'function' && typeof lastStateData !== 'undefined' && lastStateData) {
         renderState(lastStateData);
       }
-      if (typeof loadUserBets === 'function' && currentUser) {
+      if (typeof loadUserBets === 'function' && typeof currentUser !== 'undefined' && currentUser) {
         loadUserBets();
       }
     }
+
 
     document.addEventListener('DOMContentLoaded', () => {
       const sel = document.getElementById('select-currency');
@@ -968,8 +994,9 @@
 <!-- ACTIVE MODE BANNER -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-brandCard border border-brandBorder/80 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-xs font-mono gap-2 min-w-0" id="mode-banner">
 <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
-<button class="flex items-center space-x-1 px-2 py-1 sm:px-2.5 rounded-lg bg-brandDark border border-brandBorder hover:border-neonCyan text-slate-300 hover:text-neonCyan transition text-xs font-mono shadow-sm shrink-0" onclick="showSportsHomeView()" title="Return to Sports Hub">
-<span>← Hub</span>
+<button class="flex items-center space-x-2 px-4 py-1.5 sm:px-5 sm:py-2 rounded-xl bg-neonCyan/15 border border-neonCyan/40 hover:bg-neonCyan hover:border-neonCyan text-neonCyan hover:text-black transition-all text-sm font-mono font-extrabold shadow-md shadow-neonCyan/20 shrink-0 uppercase tracking-widest active:scale-95" onclick="showSportsHomeView()" title="Return to Sports Hub">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+<span>Hub</span>
 </button>
 <div class="flex items-center space-x-1.5 min-w-0 truncate">
 <span class="text-slate-400 hidden xs:inline">Sport:</span>
@@ -2817,7 +2844,7 @@
     }
 
     function updateStakingSettings() {
-      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll').value) || 1000;
+      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
       const kellyMult = parseFloat(document.getElementById('drawer-select-kelly').value) || 0.25;
       
       // Re-render immediately on client
@@ -3480,7 +3507,7 @@
 
       const inputBankroll = document.getElementById('drawer-input-bankroll');
       if (inputBankroll) {
-        inputBankroll.value = currentUser.bankroll !== undefined ? currentUser.bankroll : (serverSettings ? serverSettings.bankroll : 1000);
+        inputBankroll.value = ((currentUser.bankroll !== undefined ? currentUser.bankroll : (serverSettings ? serverSettings.bankroll : 1000)) * getRate()).toFixed(0);
       }
 
       const selectKelly = document.getElementById('drawer-select-kelly');
@@ -3634,7 +3661,7 @@
       const name = document.getElementById('drawer-input-name')?.value.trim();
       const avatarUrl = document.getElementById('drawer-input-avatar-url')?.value.trim();
       const region = document.getElementById('drawer-select-region')?.value || 'all';
-      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll')?.value) || 1000.0;
+      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
       const kellyMultiplier = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
       const minEv = parseFloat(document.getElementById('drawer-select-minev')?.value) || 0.05;
 
@@ -3694,7 +3721,7 @@
 
           // Sync dashboard controls
           const bankrollInput = document.getElementById('drawer-input-bankroll');
-          if (bankrollInput) bankrollInput.value = bankroll;
+          if (bankrollInput) bankrollInput.value = (bankroll * getRate()).toFixed(0);
 
           const kellySelect = document.getElementById('drawer-select-kelly');
           if (kellySelect) kellySelect.value = kellyMultiplier;
@@ -4000,7 +4027,7 @@
         const urlA = getSportsbookUrl(arb.book_a);
         const urlB = getSportsbookUrl(arb.book_b);
 
-        const slipCopy = `ARBITRAGE SLIP (+${profitPct}% Guaranteed Profit):\n1. Bet ${window.currencySym}${ stakeA.toFixed(2) } on ${arb.side_a} @ ${arb.book_a.toUpperCase()} (${arb.american_a || oA})\n2. Bet ${window.currencySym}${ stakeB.toFixed(2) } on ${arb.side_b} @ ${arb.book_b.toUpperCase()} (${arb.american_b || oB})\nTotal Stake: ${window.currencySym}${ budget.toFixed(2) } | Return: ${window.currencySym}${ guaranteedPayout.toFixed(2) } | Profit: +${window.currencySym}${ profitDollar.toFixed(2) }`;
+        const slipCopy = `ARBITRAGE SLIP (+${profitPct}% Guaranteed Profit):\n1. Bet ${fmtCur(stakeA)} on ${arb.side_a} @ ${arb.book_a.toUpperCase()} (${arb.american_a || oA})\n2. Bet ${fmtCur(stakeB)} on ${arb.side_b} @ ${arb.book_b.toUpperCase()} (${arb.american_b || oB})\nTotal Stake: ${fmtCur(budget)} | Return: ${fmtCur(guaranteedPayout)} | Profit: +${fmtCur(profitDollar)}`;
 
         return `
           <div class="bg-brandCard border border-neonYellow/50 hover:border-neonYellow rounded-2xl p-4 transition shadow-xl flex flex-col justify-between space-y-3">
@@ -4044,11 +4071,11 @@
                   </div>
                   <div class="flex items-center justify-between text-xs font-mono">
                     <span class="text-slate-400">Stake:</span>
-                    <span class="font-bold text-white">${window.currencySym}${ stakeA.toFixed(2) }</span>
+                    <span class="font-bold text-white">${fmtCur(stakeA)}</span>
                   </div>
                   <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
                     <span>Payout:</span>
-                    <span class="text-emerald-300 font-semibold">${window.currencySym}${ payoutA.toFixed(2) }</span>
+                    <span class="text-emerald-300 font-semibold">${fmtCur(payoutA)}</span>
                   </div>
                 </div>
 
@@ -4067,11 +4094,11 @@
                   </div>
                   <div class="flex items-center justify-between text-xs font-mono">
                     <span class="text-slate-400">Stake:</span>
-                    <span class="font-bold text-white">${window.currencySym}${ stakeB.toFixed(2) }</span>
+                    <span class="font-bold text-white">${fmtCur(stakeB)}</span>
                   </div>
                   <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
                     <span>Payout:</span>
-                    <span class="text-emerald-300 font-semibold">${window.currencySym}${ payoutB.toFixed(2) }</span>
+                    <span class="text-emerald-300 font-semibold">${fmtCur(payoutB)}</span>
                   </div>
                 </div>
               </div>
@@ -4081,13 +4108,13 @@
             <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-2.5 text-xs font-mono flex items-center justify-between">
               <div>
                 <span class="text-slate-400">Invest:</span>
-                <span class="text-white font-bold">${window.currencySym}${ budget.toFixed(2) }</span>
+                <span class="text-white font-bold">${fmtCur(budget)}</span>
                 <span class="text-slate-500 mx-1">→</span>
                 <span class="text-slate-400">Guaranteed:</span>
-                <span class="text-emerald-300 font-bold">${window.currencySym}${ guaranteedPayout.toFixed(2) }</span>
+                <span class="text-emerald-300 font-bold">${fmtCur(guaranteedPayout)}</span>
               </div>
               <div class="text-neonGreen font-extrabold">
-                +${window.currencySym}${ profitDollar.toFixed(2) }
+                +${fmtCur(profitDollar)}
               </div>
             </div>
 
@@ -4273,7 +4300,7 @@
       } else if (typeof a.sharp_true_prob === 'number') {
         pTrue = a.sharp_true_prob;
       }
-      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll')?.value) || 1000;
+      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
       const kellyMult = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
       const kelly = calcKelly(pTrue, softDec, bankroll, kellyMult);
 
@@ -4286,7 +4313,7 @@
 
       const stakeInp = document.getElementById('modal-track-stake');
       if (stakeInp) {
-        stakeInp.value = Math.max(5, Math.round(kelly.stake || 50));
+        stakeInp.value = Math.max(5, Math.round((kelly.stake || 50) * getRate()));
       }
       const notesInp = document.getElementById('modal-track-notes');
       if (notesInp) notesInp.value = '';
@@ -4302,7 +4329,7 @@
     async function confirmLogBet() {
       if (!currentTrackingAnomaly || !currentUser) return;
       const btn = document.getElementById('btn-confirm-log-bet');
-      const stakeVal = parseFloat(document.getElementById('modal-track-stake')?.value) || 10.0;
+      const stakeVal = (parseFloat(document.getElementById(\'modal-track-stake\')?.value) || (10.0 * getRate())) / getRate();
       const notesVal = document.getElementById('modal-track-notes')?.value || '';
 
       const a = currentTrackingAnomaly;
@@ -4337,7 +4364,7 @@
         });
         const data = await res.json();
         if (data.status === 'success') {
-          showToast(`✅ Logged ${window.currencySym}${ stakeVal.toFixed(2) } bet on ${a.selection}!`);
+          showToast(`✅ Logged ${fmtCur(stakeVal)} bet on ${a.selection}!`);
           closeTrackBetModal();
           loadUserBets();
         } else {
@@ -4402,7 +4429,7 @@
           const profitEl = document.getElementById('tracker-stat-profit');
           if (profitEl) {
             const p = (stats.net_profit !== undefined ? stats.net_profit : (stats.total_profit !== undefined ? stats.total_profit : 0));
-            profitEl.innerText = `${p >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(p).toFixed(2) }`;
+            profitEl.innerText = `${p >= 0 ? '+' : '-'}${fmtCur(Math.abs(p))}`;
             profitEl.className = `text-2xl font-bold font-mono mt-1 ${p >= 0 ? 'text-neonGreen' : 'text-rose-400'}`;
           }
 
@@ -4429,7 +4456,7 @@
 
           const stakedEl = document.getElementById('tracker-stat-staked');
           if (stakedEl) {
-            stakedEl.innerText = `${window.currencySym}${ (stats.total_staked || 0).toFixed(2) }`;
+            stakedEl.innerText = `${fmtCur((stats.total_staked || 0))}`;
           }
 
           const totalBetsEl = document.getElementById('tracker-stat-total-bets');
@@ -4520,17 +4547,17 @@
         let pnlText = '';
         if (bet.status === 'won') {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-neonGreen/20 text-neonGreen font-bold border border-neonGreen/30 text-[10px]">WON</span>';
-          pnlText = `<span class="text-neonGreen font-bold">+${window.currencySym}${ (bet.pnl || 0).toFixed(2) }</span>`;
+          pnlText = `<span class="text-neonGreen font-bold">+${fmtCur((bet.pnl || 0))}</span>`;
         } else if (bet.status === 'lost') {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30 text-[10px]">LOST</span>';
-          pnlText = `<span class="text-rose-400 font-bold">-${window.currencySym}${ (bet.stake || 0).toFixed(2) }</span>`;
+          pnlText = `<span class="text-rose-400 font-bold">-${fmtCur((bet.stake || 0))}</span>`;
         } else if (bet.status === 'push') {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-bold text-[10px]">PUSH</span>';
           pnlText = '<span class="text-slate-400 font-bold"><span class="currency-sym">$</span>0.00</span>';
         } else {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 text-[10px] animate-pulse">PENDING</span>';
           const potProfit = (bet.stake * bet.odds_decimal) - bet.stake;
-          pnlText = `<span class="text-slate-400 text-[11px]" title="Potential Profit">Pot: +${window.currencySym}${ potProfit.toFixed(2) }</span>`;
+          pnlText = `<span class="text-slate-400 text-[11px]" title="Potential Profit">Pot: +${fmtCur(potProfit)}</span>`;
         }
 
         let actionBtns = '';
@@ -4568,7 +4595,7 @@
               <span class="text-neonYellow font-bold">${bet.odds_decimal || bet.odds || '—'}</span>
               ${bet.odds_american ? `<span class="text-slate-500 text-[10px]"> (${bet.odds_american})</span>` : ''}
             </td>
-            <td class="py-3 px-3 font-bold text-white">${window.currencySym}${ (bet.stake || 0).toFixed(2) }</td>
+            <td class="py-3 px-3 font-bold text-white">${fmtCur((bet.stake || 0))}</td>
             <td class="py-3 px-3 text-neonGreen font-semibold">${bet.expected_value || (bet.edge_pct ? `+${bet.edge_pct}%` : '—')}</td>
             <td class="py-3 px-3">${statusBadge}</td>
             <td class="py-3 px-3 font-mono">${pnlText}</td>
@@ -4656,13 +4683,13 @@
       currentChartPnls = pnls;
 
       if (summaryEl) {
-        summaryEl.innerText = `${lastPnl >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(lastPnl).toFixed(2) }`;
+        summaryEl.innerText = `${lastPnl >= 0 ? '+' : '-'}${fmtCur(Math.abs(lastPnl))}`;
         summaryEl.className = `font-bold text-sm ${lastPnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}`;
       }
 
       if (peakEl) {
         const peak = Math.max(0, ...pnls);
-        peakEl.innerText = `${peak > 0 ? '+' : ''}${window.currencySym}${ peak.toFixed(2) }`;
+        peakEl.innerText = `${peak > 0 ? '+' : ''}${fmtCur(peak)}`;
         peakEl.className = `font-bold ${peak > 0 ? 'text-neonGreen' : 'text-white'}`;
       }
 
@@ -4696,7 +4723,7 @@
         const strokeWidth = isZero ? '1.5' : '1';
         const dashArray = isZero ? '4 4' : '2 2';
         const textColor = isZero ? '#CBD5E1' : '#94A3B8';
-        const formatted = (val > 0 ? '+' : '') + window.currencySym + val.toFixed(2);
+        const formatted = (val > 0 ? '+' : '') + fmtCur(val);
         return `
           <line x1="${padLeft}" y1="${y}" x2="${W - padRight}" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" />
           <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" fill="${textColor}" font-size="11" font-family="monospace" font-weight="${isZero ? 'bold' : 'normal'}">${formatted}</text>
@@ -4822,7 +4849,7 @@
       if (closestIdx > 0) {
         const delta = pnl - currentChartPnls[closestIdx - 1];
         const deltaColor = delta >= 0 ? 'text-neonGreen' : 'text-rose-400';
-        deltaStr = `<span class="${deltaColor} font-bold">${delta >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(delta).toFixed(2) }</span>`;
+        deltaStr = `<span class="${deltaColor} font-bold">${delta >= 0 ? '+' : '-'}${fmtCur(Math.abs(delta))}</span>`;
       }
 
       let dateStr = '';
@@ -4843,11 +4870,11 @@
         bodySection = `
           <div class="flex justify-between items-center text-[10px]">
             <span class="text-slate-400">Stake:</span>
-            <span class="font-bold text-white">${window.currencySym}${ (pt.stake || 0).toFixed(2) }</span>
+            <span class="font-bold text-white">${fmtCur((pt.stake || 0))}</span>
           </div>
           <div class="flex justify-between items-center text-[10px]">
             <span class="text-slate-400">Potential Return:</span>
-            <span class="font-bold text-neonGreen">+${window.currencySym}${ (pt.potential_profit || 0).toFixed(2) }</span>
+            <span class="font-bold text-neonGreen">+${fmtCur((pt.potential_profit || 0))}</span>
           </div>
           <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-700/60">
             <span class="text-slate-400">Status:</span>
@@ -4862,7 +4889,7 @@
           </div>
           <div class="flex justify-between items-center text-xs">
             <span class="text-slate-400">Cumulative:</span>
-            <span class="font-bold ${pnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}">${pnl >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(pnl).toFixed(2) }</span>
+            <span class="font-bold ${pnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}">${pnl >= 0 ? '+' : '-'}${fmtCur(Math.abs(pnl))}</span>
           </div>
         `;
       }
@@ -4954,7 +4981,7 @@
           const kellySelect = document.getElementById('drawer-select-kelly');
 
           if (bankrollInput && document.activeElement !== bankrollInput) {
-            bankrollInput.value = state.settings.bankroll || 1000;
+            bankrollInput.value = ((state.settings.bankroll || 1000) * getRate()).toFixed(0);
           }
           if (kellySelect) {
             kellySelect.value = state.settings.kelly_multiplier || 0.25;
@@ -5103,7 +5130,7 @@
         ? `Showing ${aStart + 1}–${aEnd} of ${anomalies.length} alerts${searchQuery ? ' (filtered)' : ''}`
         : '0 alerts';
 
-      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll')?.value) || 1000;
+      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
       const kellyMult = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
 
       const anomaliesContainer = document.getElementById('anomalies-container');
@@ -5137,7 +5164,7 @@
           const bookUrl = getSportsbookUrl(a.target_book);
 
           const fmtTag = a.format_title ? ` [${a.format_title}]` : '';
-          const copyString = `Bet ${a.selection} on ${a.target_book.toUpperCase()} at ${a.soft_american}${fmtTag} - Stake: ${window.currencySym}${ kelly.stake.toFixed(2) }`;
+          const copyString = `Bet ${a.selection} on ${a.target_book.toUpperCase()} at ${a.soft_american}${fmtTag} - Stake: ${fmtCur(kelly.stake)}`;
           const bookCount = eventBookCountMap[a.event_id] || 0;
 
           return `
@@ -5172,7 +5199,7 @@
                   </div>
                   <div class="text-[11px] text-slate-400 font-mono mt-1.5 flex items-center justify-between">
                     <span>Bookmaker: <span class="text-slate-200 font-bold uppercase">${a.target_book}</span></span>
-                    <span class="text-neonGreen font-semibold">Suggested Stake: ${window.currencySym}${ kelly.stake.toFixed(2) }</span>
+                    <span class="text-neonGreen font-semibold">Suggested Stake: ${fmtCur(kelly.stake)}</span>
                   </div>
                 </div>
 
