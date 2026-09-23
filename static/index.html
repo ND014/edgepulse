@@ -155,6 +155,13 @@
 <div class="pt-2">
 <div class="text-[10px] font-bold text-neonCyan tracking-wider uppercase px-2 mb-1">Baseball</div>
 <div class="space-y-1">
+<button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('baseball', 'All Active Baseball', 'baseball')">
+<div>
+<div class="text-xs font-bold text-white group-hover:text-neonCyan transition">All Active Baseball <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">ALL MATCHES</span></div>
+<div class="text-[10px] text-slate-400">Scan all in-season baseball games</div>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+</button>
 <button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('baseball_mlb', 'Baseball (MLB)', 'baseball')">
 <div>
 <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">MLB (Major League Baseball)</div>
@@ -204,6 +211,13 @@
 <div class="pt-2">
 <div class="text-[10px] font-bold text-orange-400 tracking-wider uppercase px-2 mb-1">Basketball</div>
 <div class="space-y-1">
+<button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('basketball', 'All Active Basketball', 'basketball_nba')">
+<div>
+<div class="text-xs font-bold text-white group-hover:text-neonCyan transition">All Active Basketball <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">ALL MATCHES</span></div>
+<div class="text-[10px] text-slate-400">Scan all in-season basketball games</div>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+</button>
 <button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('basketball_nba', 'Basketball (NBA)', 'basketball_nba')">
 <div>
 <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">NBA (National Basketball Assoc.)</div>
@@ -293,6 +307,13 @@
 <div class="pt-2">
 <div class="text-[10px] font-bold text-neonGreen tracking-wider uppercase px-2 mb-1">Soccer (Draw No Bet / 2-Way)</div>
 <div class="space-y-1">
+<button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('soccer', 'All Active Soccer', 'soccer_dnb')">
+<div>
+<div class="text-xs font-bold text-white group-hover:text-neonCyan transition">All Active Soccer <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">ALL MATCHES</span></div>
+<div class="text-[10px] text-slate-400">Scan all in-season soccer games</div>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+</button>
 <button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('soccer_epl', 'Soccer (EPL)', 'soccer_dnb')">
 <div>
 <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">English Premier League (EPL)</div>
@@ -382,6 +403,13 @@
 <div class="pt-2">
 <div class="text-[10px] font-bold text-sky-400 tracking-wider uppercase px-2 mb-1">American Football</div>
 <div class="space-y-1">
+<button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('americanfootball', 'All Active Football', 'americanfootball')">
+<div>
+<div class="text-xs font-bold text-white group-hover:text-neonCyan transition">All Active Football <span class="text-[9px] font-mono px-1 py-0.5 rounded bg-neonGreen/20 text-neonGreen font-semibold">ALL MATCHES</span></div>
+<div class="text-[10px] text-slate-400">Scan all in-season american football games</div>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neonGreen/10 text-neonGreen border border-neonGreen/30 font-semibold">Live</span>
+</button>
 <button class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-brandDark border border-transparent hover:border-brandBorder transition text-left group" onclick="scanSport('americanfootball_nfl', 'Football (NFL)', 'americanfootball')">
 <div>
 <div class="text-xs font-bold text-white group-hover:text-neonCyan transition">NFL (National Football League)</div>
@@ -762,13 +790,14 @@
             </p>
 </div>
 <div class="flex flex-wrap gap-1.5 pt-1">
+<button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-300 hover:border-orange-400 hover:text-white transition" onclick="selectSportFromHub('basketball', 'Basketball (All Active)', 'basketball_nba')">All Active</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-orange-400 hover:text-orange-400 transition" onclick="selectSportFromHub('basketball_nba', 'Basketball (NBA)', 'basketball_nba')">NBA</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-orange-400 hover:text-orange-400 transition" onclick="selectSportFromHub('basketball_wnba', 'Basketball (WNBA)', 'basketball_nba')">WNBA</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-orange-400 hover:text-orange-400 transition" onclick="selectSportFromHub('basketball_euroleague', 'Basketball (EuroLeague)', 'basketball_nba')">EuroLeague</button>
 </div>
 </div>
 <div class="pt-6 mt-2 border-t border-brandBorder/50">
-<button class="w-full py-2.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-400 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-orange-500/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub('basketball_nba', 'Basketball (NBA)', 'basketball_nba')">
+<button class="w-full py-2.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-400 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-orange-500/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub(\'basketball\', \'Basketball (All Active)\', \'basketball_nba\')">
 <span>Launch Basketball Market Board</span>
 <span>→</span>
 </button>
@@ -795,6 +824,7 @@
             </p>
 </div>
 <div class="flex flex-wrap gap-1.5 pt-1">
+<button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:border-cyan-400 hover:text-white transition" onclick="selectSportFromHub('soccer', 'Soccer (All Active)', 'soccer_dnb')">All Active</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition" onclick="selectSportFromHub('soccer_epl', 'Soccer (EPL)', 'soccer_dnb')">EPL</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition" onclick="selectSportFromHub('soccer_uefa_champs_league', 'Soccer (Champions League)', 'soccer_dnb')">UCL</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition" onclick="selectSportFromHub('soccer_spain_la_liga', 'Soccer (La Liga)', 'soccer_dnb')">La Liga</button>
@@ -802,7 +832,7 @@
 </div>
 </div>
 <div class="pt-6 mt-2 border-t border-brandBorder/50">
-<button class="w-full py-2.5 px-4 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-cyan-400/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub('soccer_epl', 'Soccer (EPL)', 'soccer_dnb')">
+<button class="w-full py-2.5 px-4 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-cyan-400/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub(\'soccer\', \'Soccer (All Active)\', \'soccer_dnb\')">
 <span>Launch Soccer Market Board</span>
 <span>→</span>
 </button>
@@ -829,13 +859,14 @@
             </p>
 </div>
 <div class="flex flex-wrap gap-1.5 pt-1">
+<button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 hover:border-sky-400 hover:text-white transition" onclick="selectSportFromHub('baseball', 'Baseball (All Active)', 'baseball')">All Active</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-sky-400 hover:text-sky-400 transition" onclick="selectSportFromHub('baseball_mlb', 'Baseball (MLB)', 'baseball')">MLB (USA)</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-sky-400 hover:text-sky-400 transition" onclick="selectSportFromHub('baseball_npb', 'Baseball (NPB Japan)', 'baseball')">NPB (Japan)</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-sky-400 hover:text-sky-400 transition" onclick="selectSportFromHub('baseball_kbo', 'Baseball (KBO Korea)', 'baseball')">KBO (Korea)</button>
 </div>
 </div>
 <div class="pt-6 mt-2 border-t border-brandBorder/50">
-<button class="w-full py-2.5 px-4 rounded-xl bg-sky-400 hover:bg-sky-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub('baseball_mlb', 'Baseball (MLB)', 'baseball')">
+<button class="w-full py-2.5 px-4 rounded-xl bg-sky-400 hover:bg-sky-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub(\'baseball\', \'Baseball (All Active)\', \'baseball\')">
 <span>Launch Baseball Market Board</span>
 <span>→</span>
 </button>
@@ -928,12 +959,13 @@
             </p>
 </div>
 <div class="flex flex-wrap gap-1.5 pt-1">
+<button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 hover:border-sky-400 hover:text-white transition" onclick="selectSportFromHub('americanfootball', 'Football (All Active)', 'americanfootball')">All Active</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 hover:border-sky-400 hover:text-white transition" onclick="selectSportFromHub('americanfootball_nfl', 'Football (NFL)', 'americanfootball')">NFL Matches</button>
 <button class="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-brandDark border border-brandBorder text-slate-300 hover:border-sky-400 hover:text-sky-400 transition" onclick="selectSportFromHub('americanfootball_ncaaf', 'NCAA Football', 'americanfootball')">College Football (NCAAF)</button>
 </div>
 </div>
 <div class="pt-6 mt-2 border-t border-brandBorder/50">
-<button class="w-full py-2.5 px-4 rounded-xl bg-sky-400 hover:bg-sky-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub('americanfootball_nfl', 'Football (NFL)', 'americanfootball')">
+<button class="w-full py-2.5 px-4 rounded-xl bg-sky-400 hover:bg-sky-300 text-black font-bold font-mono text-xs transition active:scale-95 shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2" onclick="selectSportFromHub(\'americanfootball\', \'Football (All Active)\', \'americanfootball\')">
 <span>Launch Football Market Board</span>
 <span>→</span>
 </button>
