@@ -86,7 +86,7 @@ current_active_sport_key = "all"
 CACHE_DIR = ROOT_DIR / "data_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 CACHE_FILE = CACHE_DIR / "latest.json"
-SPORT_SCAN_COOLDOWN_SECONDS = int(os.environ.get("SPORT_SCAN_COOLDOWN_SECONDS", 300))
+SPORT_SCAN_COOLDOWN_SECONDS = int(os.environ.get("SPORT_SCAN_COOLDOWN_SECONDS", 15))
 SPORT_LAST_SCAN: Dict[str, float] = {}
 
 ACTIVE_SPORTS_CACHE: Dict[str, Any] = {"timestamp": 0, "sports": []}
