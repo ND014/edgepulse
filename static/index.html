@@ -1074,7 +1074,7 @@
         <!-- Bankroll Input -->
         <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
           <span class="text-slate-400 font-semibold text-[11px]">Roll:</span>
-          <span class="text-neonGreen font-bold">$</span>
+          <span class="text-neonGreen font-bold currency-sym">$</span>
           <input id="input-bankroll" type="number" min="10" step="50" value="1000" oninput="updateStakingSettings()" class="w-16 bg-transparent text-white font-bold focus:outline-none focus:text-neonGreen text-xs" />
         </div>
 
@@ -1096,6 +1096,19 @@
             <option value="0.02">≥ +2.0%</option>
             <option value="0.03">≥ +3.0%</option>
             <option value="0.05">≥ +5.0%</option>
+          </select>
+        </div>
+
+        <!-- Bookmaker Geo-Region Filter -->
+                <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0" title="Display Currency">
+          <span class="text-slate-400 font-semibold text-[11px]">Cur:</span>
+          <select id="select-currency" onchange="changeCurrency(this.value)" class="bg-transparent text-neonGreen font-bold focus:outline-none cursor-pointer text-xs">
+            <option value="$" selected>USD ($)</option>
+            <option value="₹">INR (₹)</option>
+            <option value="€">EUR (€)</option>
+            <option value="£">GBP (£)</option>
+            <option value="A$">AUD (A$)</option>
+            <option value="C$">CAD (C$)</option>
           </select>
         </div>
 
@@ -1314,7 +1327,7 @@
         <div class="flex items-center space-x-2 text-xs font-mono">
           <span class="text-slate-400">Total Hedge Budget:</span>
           <div class="flex items-center space-x-1 bg-brandCard border border-brandBorder rounded-xl px-2.5 py-1">
-            <span class="text-neonGreen font-bold">$</span>
+            <span class="text-neonGreen font-bold currency-sym">$</span>
             <input type="number" id="input-arb-budget" value="1000" min="50" step="50" oninput="recalcArbitrageBudgets(this.value)" class="w-20 bg-transparent text-white font-bold font-mono focus:outline-none" />
           </div>
           <span class="text-xs text-slate-400 font-mono" id="arbitrage-counter">0 Surebets</span>
@@ -1388,7 +1401,7 @@
       <!-- Net Profit / Loss -->
       <div class="bg-brandCard border border-brandBorder rounded-2xl p-4 relative overflow-hidden">
         <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Net Profit / P&L</div>
-        <div id="tracker-stat-profit" class="text-2xl font-bold font-mono mt-1 text-neonGreen">+$0.00</div>
+        <div id="tracker-stat-profit" class="text-2xl font-bold font-mono mt-1 text-neonGreen">+<span class="currency-sym">$</span>0.00</div>
         <div id="tracker-stat-profit-sub" class="text-[10px] text-slate-500 font-mono mt-0.5">Across settled bets</div>
       </div>
 
@@ -1409,7 +1422,7 @@
       <!-- Total Staked -->
       <div class="bg-brandCard border border-brandBorder rounded-2xl p-4 relative overflow-hidden">
         <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Total Staked</div>
-        <div id="tracker-stat-staked" class="text-2xl font-bold font-mono mt-1 text-white">$0.00</div>
+        <div id="tracker-stat-staked" class="text-2xl font-bold font-mono mt-1 text-white"><span class="currency-sym">$</span>0.00</div>
         <div id="tracker-stat-total-bets" class="text-[10px] text-slate-500 font-mono mt-0.5">0 total bets logged</div>
       </div>
 
@@ -1434,11 +1447,11 @@
         <div class="flex items-center space-x-3 text-xs font-mono">
           <div class="hidden sm:flex items-center space-x-1.5 text-slate-400 text-[11px]">
             <span>Peak:</span>
-            <span id="tracker-chart-peak" class="font-bold text-white">$0.00</span>
+            <span id="tracker-chart-peak" class="font-bold text-white"><span class="currency-sym">$</span>0.00</span>
           </div>
           <div class="flex items-center space-x-1.5 bg-brandDark/80 px-2.5 py-1 rounded-lg border border-brandBorder/60">
             <span class="text-slate-400 text-[11px]">Net P&L:</span>
-            <span id="tracker-chart-summary" class="font-bold text-neonGreen text-sm">$0.00</span>
+            <span id="tracker-chart-summary" class="font-bold text-neonGreen text-sm"><span class="currency-sym">$</span>0.00</span>
           </div>
         </div>
       </div>
@@ -1531,9 +1544,9 @@
         </div>
 
         <div>
-          <label class="block text-slate-400 font-semibold mb-1 text-[11px]">Wager Stake ($)</label>
+          <label class="block text-slate-400 font-semibold mb-1 text-[11px]">Wager Stake (<span class="currency-sym">$</span>)</label>
           <div class="relative">
-            <span class="absolute left-3 top-2.5 text-slate-500 font-mono">$</span>
+            <span class="absolute left-3 top-2.5 text-slate-500 font-mono"><span class="currency-sym">$</span></span>
             <input type="number" id="modal-track-stake" min="1" step="5" class="w-full bg-brandDark border border-brandBorder rounded-xl pl-7 pr-3 py-2.5 text-white font-bold font-mono focus:outline-none focus:border-neonGreen" />
           </div>
           <p class="text-[10px] text-slate-500 mt-1">Pre-filled with recommended Kelly stake. You can adjust this amount.</p>
@@ -1768,9 +1781,9 @@
         <!-- Bankroll & Kelly -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-300 mb-1.5">Bankroll ($ / Units)</label>
+            <label class="block font-semibold text-slate-300 mb-1.5">Bankroll (<span class="currency-sym">$</span> / Units)</label>
             <div class="relative">
-              <span class="absolute left-3 top-2 text-slate-500 font-mono">$</span>
+              <span class="absolute left-3 top-2 text-slate-500 font-mono currency-sym">$</span>
               <input type="number" id="drawer-input-bankroll" min="10" step="50" class="w-full bg-brandDark border border-brandBorder rounded-xl pl-7 pr-3 py-2 text-white font-bold font-mono focus:outline-none focus:border-neonGreen" />
             </div>
           </div>
@@ -4170,7 +4183,7 @@
         const urlA = getSportsbookUrl(arb.book_a);
         const urlB = getSportsbookUrl(arb.book_b);
 
-        const slipCopy = `ARBITRAGE SLIP (+${profitPct}% Guaranteed Profit):\n1. Bet $${stakeA.toFixed(2)} on ${arb.side_a} @ ${arb.book_a.toUpperCase()} (${arb.american_a || oA})\n2. Bet $${stakeB.toFixed(2)} on ${arb.side_b} @ ${arb.book_b.toUpperCase()} (${arb.american_b || oB})\nTotal Stake: $${budget.toFixed(2)} | Return: $${guaranteedPayout.toFixed(2)} | Profit: +$${profitDollar.toFixed(2)}`;
+        const slipCopy = `ARBITRAGE SLIP (+${profitPct}% Guaranteed Profit):\n1. Bet ${window.currencySym}${ stakeA.toFixed(2) } on ${arb.side_a} @ ${arb.book_a.toUpperCase()} (${arb.american_a || oA})\n2. Bet ${window.currencySym}${ stakeB.toFixed(2) } on ${arb.side_b} @ ${arb.book_b.toUpperCase()} (${arb.american_b || oB})\nTotal Stake: ${window.currencySym}${ budget.toFixed(2) } | Return: ${window.currencySym}${ guaranteedPayout.toFixed(2) } | Profit: +${window.currencySym}${ profitDollar.toFixed(2) }`;
 
         return `
           <div class="bg-brandCard border border-neonYellow/50 hover:border-neonYellow rounded-2xl p-4 transition shadow-xl flex flex-col justify-between space-y-3">
@@ -4214,11 +4227,11 @@
                   </div>
                   <div class="flex items-center justify-between text-xs font-mono">
                     <span class="text-slate-400">Stake:</span>
-                    <span class="font-bold text-white">$${stakeA.toFixed(2)}</span>
+                    <span class="font-bold text-white">${window.currencySym}${ stakeA.toFixed(2) }</span>
                   </div>
                   <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
                     <span>Payout:</span>
-                    <span class="text-emerald-300 font-semibold">$${payoutA.toFixed(2)}</span>
+                    <span class="text-emerald-300 font-semibold">${window.currencySym}${ payoutA.toFixed(2) }</span>
                   </div>
                 </div>
 
@@ -4237,11 +4250,11 @@
                   </div>
                   <div class="flex items-center justify-between text-xs font-mono">
                     <span class="text-slate-400">Stake:</span>
-                    <span class="font-bold text-white">$${stakeB.toFixed(2)}</span>
+                    <span class="font-bold text-white">${window.currencySym}${ stakeB.toFixed(2) }</span>
                   </div>
                   <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
                     <span>Payout:</span>
-                    <span class="text-emerald-300 font-semibold">$${payoutB.toFixed(2)}</span>
+                    <span class="text-emerald-300 font-semibold">${window.currencySym}${ payoutB.toFixed(2) }</span>
                   </div>
                 </div>
               </div>
@@ -4251,13 +4264,13 @@
             <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-2.5 text-xs font-mono flex items-center justify-between">
               <div>
                 <span class="text-slate-400">Invest:</span>
-                <span class="text-white font-bold">$${budget.toFixed(2)}</span>
+                <span class="text-white font-bold">${window.currencySym}${ budget.toFixed(2) }</span>
                 <span class="text-slate-500 mx-1">→</span>
                 <span class="text-slate-400">Guaranteed:</span>
-                <span class="text-emerald-300 font-bold">$${guaranteedPayout.toFixed(2)}</span>
+                <span class="text-emerald-300 font-bold">${window.currencySym}${ guaranteedPayout.toFixed(2) }</span>
               </div>
               <div class="text-neonGreen font-extrabold">
-                +$${profitDollar.toFixed(2)}
+                +${window.currencySym}${ profitDollar.toFixed(2) }
               </div>
             </div>
 
@@ -4507,7 +4520,7 @@
         });
         const data = await res.json();
         if (data.status === 'success') {
-          showToast(`✅ Logged $${stakeVal.toFixed(2)} bet on ${a.selection}!`);
+          showToast(`✅ Logged ${window.currencySym}${ stakeVal.toFixed(2) } bet on ${a.selection}!`);
           closeTrackBetModal();
           loadUserBets();
         } else {
@@ -4572,7 +4585,7 @@
           const profitEl = document.getElementById('tracker-stat-profit');
           if (profitEl) {
             const p = (stats.net_profit !== undefined ? stats.net_profit : (stats.total_profit !== undefined ? stats.total_profit : 0));
-            profitEl.innerText = `${p >= 0 ? '+' : '-'}$${Math.abs(p).toFixed(2)}`;
+            profitEl.innerText = `${p >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(p).toFixed(2) }`;
             profitEl.className = `text-2xl font-bold font-mono mt-1 ${p >= 0 ? 'text-neonGreen' : 'text-rose-400'}`;
           }
 
@@ -4599,7 +4612,7 @@
 
           const stakedEl = document.getElementById('tracker-stat-staked');
           if (stakedEl) {
-            stakedEl.innerText = `$${(stats.total_staked || 0).toFixed(2)}`;
+            stakedEl.innerText = `${window.currencySym}${ (stats.total_staked || 0).toFixed(2) }`;
           }
 
           const totalBetsEl = document.getElementById('tracker-stat-total-bets');
@@ -4690,17 +4703,17 @@
         let pnlText = '';
         if (bet.status === 'won') {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-neonGreen/20 text-neonGreen font-bold border border-neonGreen/30 text-[10px]">WON</span>';
-          pnlText = `<span class="text-neonGreen font-bold">+$${(bet.pnl || 0).toFixed(2)}</span>`;
+          pnlText = `<span class="text-neonGreen font-bold">+${window.currencySym}${ (bet.pnl || 0).toFixed(2) }</span>`;
         } else if (bet.status === 'lost') {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30 text-[10px]">LOST</span>';
-          pnlText = `<span class="text-rose-400 font-bold">-$${(bet.stake || 0).toFixed(2)}</span>`;
+          pnlText = `<span class="text-rose-400 font-bold">-${window.currencySym}${ (bet.stake || 0).toFixed(2) }</span>`;
         } else if (bet.status === 'push') {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-bold text-[10px]">PUSH</span>';
-          pnlText = '<span class="text-slate-400 font-bold">$0.00</span>';
+          pnlText = '<span class="text-slate-400 font-bold"><span class="currency-sym">$</span>0.00</span>';
         } else {
           statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 text-[10px] animate-pulse">PENDING</span>';
           const potProfit = (bet.stake * bet.odds_decimal) - bet.stake;
-          pnlText = `<span class="text-slate-400 text-[11px]" title="Potential Profit">Pot: +$${potProfit.toFixed(2)}</span>`;
+          pnlText = `<span class="text-slate-400 text-[11px]" title="Potential Profit">Pot: +${window.currencySym}${ potProfit.toFixed(2) }</span>`;
         }
 
         let actionBtns = '';
@@ -4738,7 +4751,7 @@
               <span class="text-neonYellow font-bold">${bet.odds_decimal || bet.odds || '—'}</span>
               ${bet.odds_american ? `<span class="text-slate-500 text-[10px]"> (${bet.odds_american})</span>` : ''}
             </td>
-            <td class="py-3 px-3 font-bold text-white">$${(bet.stake || 0).toFixed(2)}</td>
+            <td class="py-3 px-3 font-bold text-white">${window.currencySym}${ (bet.stake || 0).toFixed(2) }</td>
             <td class="py-3 px-3 text-neonGreen font-semibold">${bet.expected_value || (bet.edge_pct ? `+${bet.edge_pct}%` : '—')}</td>
             <td class="py-3 px-3">${statusBadge}</td>
             <td class="py-3 px-3 font-mono">${pnlText}</td>
@@ -4826,13 +4839,13 @@
       currentChartPnls = pnls;
 
       if (summaryEl) {
-        summaryEl.innerText = `${lastPnl >= 0 ? '+' : '-'}$${Math.abs(lastPnl).toFixed(2)}`;
+        summaryEl.innerText = `${lastPnl >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(lastPnl).toFixed(2) }`;
         summaryEl.className = `font-bold text-sm ${lastPnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}`;
       }
 
       if (peakEl) {
         const peak = Math.max(0, ...pnls);
-        peakEl.innerText = `${peak > 0 ? '+' : ''}$${peak.toFixed(2)}`;
+        peakEl.innerText = `${peak > 0 ? '+' : ''}${window.currencySym}${ peak.toFixed(2) }`;
         peakEl.className = `font-bold ${peak > 0 ? 'text-neonGreen' : 'text-white'}`;
       }
 
@@ -4992,7 +5005,7 @@
       if (closestIdx > 0) {
         const delta = pnl - currentChartPnls[closestIdx - 1];
         const deltaColor = delta >= 0 ? 'text-neonGreen' : 'text-rose-400';
-        deltaStr = `<span class="${deltaColor} font-bold">${delta >= 0 ? '+' : '-'}$${Math.abs(delta).toFixed(2)}</span>`;
+        deltaStr = `<span class="${deltaColor} font-bold">${delta >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(delta).toFixed(2) }</span>`;
       }
 
       let dateStr = '';
@@ -5013,11 +5026,11 @@
         bodySection = `
           <div class="flex justify-between items-center text-[10px]">
             <span class="text-slate-400">Stake:</span>
-            <span class="font-bold text-white">$${(pt.stake || 0).toFixed(2)}</span>
+            <span class="font-bold text-white">${window.currencySym}${ (pt.stake || 0).toFixed(2) }</span>
           </div>
           <div class="flex justify-between items-center text-[10px]">
             <span class="text-slate-400">Potential Return:</span>
-            <span class="font-bold text-neonGreen">+$${(pt.potential_profit || 0).toFixed(2)}</span>
+            <span class="font-bold text-neonGreen">+${window.currencySym}${ (pt.potential_profit || 0).toFixed(2) }</span>
           </div>
           <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-700/60">
             <span class="text-slate-400">Status:</span>
@@ -5032,7 +5045,7 @@
           </div>
           <div class="flex justify-between items-center text-xs">
             <span class="text-slate-400">Cumulative:</span>
-            <span class="font-bold ${pnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}">${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toFixed(2)}</span>
+            <span class="font-bold ${pnl >= 0 ? 'text-neonGreen' : 'text-rose-400'}">${pnl >= 0 ? '+' : '-'}${window.currencySym}${ Math.abs(pnl).toFixed(2) }</span>
           </div>
         `;
       }
@@ -5307,7 +5320,7 @@
           const bookUrl = getSportsbookUrl(a.target_book);
 
           const fmtTag = a.format_title ? ` [${a.format_title}]` : '';
-          const copyString = `Bet ${a.selection} on ${a.target_book.toUpperCase()} at ${a.soft_american}${fmtTag} - Stake: $${kelly.stake.toFixed(2)}`;
+          const copyString = `Bet ${a.selection} on ${a.target_book.toUpperCase()} at ${a.soft_american}${fmtTag} - Stake: ${window.currencySym}${ kelly.stake.toFixed(2) }`;
           const bookCount = eventBookCountMap[a.event_id] || 0;
 
           return `
@@ -5342,7 +5355,7 @@
                   </div>
                   <div class="text-[11px] text-slate-400 font-mono mt-1.5 flex items-center justify-between">
                     <span>Bookmaker: <span class="text-slate-200 font-bold uppercase">${a.target_book}</span></span>
-                    <span class="text-neonGreen font-semibold">Suggested Stake: $${kelly.stake.toFixed(2)}</span>
+                    <span class="text-neonGreen font-semibold">Suggested Stake: ${window.currencySym}${ kelly.stake.toFixed(2) }</span>
                   </div>
                 </div>
 
