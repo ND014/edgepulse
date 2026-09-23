@@ -597,9 +597,9 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
 
     # Ingest quotes
     total_fetched = 0
-    from src.feeds.enrichment import inject_indian_sportsbooks
+    from src.feeds.enrichment import inject_asian_sportsbooks
     for match in combined_matches:
-        inject_indian_sportsbooks(match)
+        inject_asian_sportsbooks(match)
         commence_time = match.get("commence_time", "")
         m_sport_key = match.get("sport_key", "")
         m_sport_title = match.get("sport_title", "")
@@ -754,9 +754,9 @@ def load_cached_odds(target_filter="all"):
                 if not data:
                     data = raw_data
 
-                from src.feeds.enrichment import inject_indian_sportsbooks
+                from src.feeds.enrichment import inject_asian_sportsbooks
                 for match in data:
-                    inject_indian_sportsbooks(match)
+                    inject_asian_sportsbooks(match)
                     commence_time = match.get("commence_time", "")
                     m_sport_key = match.get("sport_key", "")
                     m_sport_title = match.get("sport_title", "")

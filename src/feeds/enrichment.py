@@ -3,19 +3,26 @@ import copy
 from typing import Dict, Any, List
 from src.math_engine import american_to_decimal, decimal_to_american
 
-INDIAN_BOOKMAKERS = [
+ASIAN_BOOKMAKERS = [
+    # India / General Asia
     {"key": "stake", "title": "Stake"},
     {"key": "parimatch", "title": "Parimatch"},
     {"key": "dafabet", "title": "Dafabet"},
     {"key": "10cric", "title": "10Cric"},
     {"key": "melbet", "title": "Melbet"},
     {"key": "betway", "title": "Betway"},
-    {"key": "polymarket", "title": "Polymarket"}
+    {"key": "polymarket", "title": "Polymarket"},
+    # SE Asia (Singapore, Malaysia, etc.)
+    {"key": "sg_pools", "title": "Singapore Pools"},
+    {"key": "bk8", "title": "BK8"},
+    {"key": "me88", "title": "Me88"},
+    {"key": "12play", "title": "12Play"},
+    {"key": "sbobet", "title": "SBOBET"}
 ]
 
-def inject_indian_sportsbooks(match: Dict[str, Any]) -> None:
+def inject_asian_sportsbooks(match: Dict[str, Any]) -> None:
     """
-    Enriches a match dictionary with synthetic quotes for popular Indian/Crypto
+    Enriches a match dictionary with synthetic quotes for popular Asian/Crypto
     sportsbooks by deriving them from existing market consensus.
     """
     existing_books = match.get("bookmakers", [])
@@ -34,7 +41,7 @@ def inject_indian_sportsbooks(match: Dict[str, Any]) -> None:
         return
         
     # Inject our new books
-    for new_book in INDIAN_BOOKMAKERS:
+    for new_book in ASIAN_BOOKMAKERS:
         # 20% chance this book doesn't offer this match, to make it realistic
         if random.random() < 0.2:
             continue
