@@ -29,7 +29,19 @@ from src import db
 
 ROOT_DIR = Path(__file__).resolve().parent
 ENV_FILE = ROOT_DIR / ".env"
-ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
+ODDS_API_KEYS = [k.strip() for k in os.environ.get("ODDS_API_KEY", "").split(",") if k.strip()]
+CURRENT_API_KEY_INDEX = 0
+
+def get_api_key():
+    return ODDS_API_KEYS[CURRENT_API_KEY_INDEX] if ODDS_API_KEYS else ""
+
+def rotate_api_key():
+    global CURRENT_API_KEY_INDEX
+    if not ODDS_API_KEYS: return False
+    CURRENT_API_KEY_INDEX = (CURRENT_API_KEY_INDEX + 1) % len(ODDS_API_KEYS)
+    print(f"Rotated to API Key index {CURRENT_API_KEY_INDEX}")
+    return True
+
 DEFAULT_GOOGLE_CLIENT_ID = "508845137062-g24ukrhleck76s93hikuqld8qe53nrll.apps.googleusercontent.com"
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID") or DEFAULT_GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
@@ -44,7 +56,7 @@ if ENV_FILE.exists():
                 k_clean = k.strip()
                 v_clean = v.strip().strip('"').strip("'")
                 if k_clean == "ODDS_API_KEY" and "ODDS_API_KEY" not in os.environ:
-                    ODDS_API_KEY = v_clean
+                    ODDS_API_KEYS = [k.strip() for k in v_clean.split(",") if k.strip()]
                 elif k_clean == "GOOGLE_CLIENT_ID" and "GOOGLE_CLIENT_ID" not in os.environ:
                     GOOGLE_CLIENT_ID = v_clean
                 elif k_clean == "GOOGLE_CLIENT_SECRET" and "GOOGLE_CLIENT_SECRET" not in os.environ:
@@ -88,9 +100,9 @@ def get_active_the_odds_api_sports() -> List[Dict[str, Any]]:
     now = time.time()
     if ACTIVE_SPORTS_CACHE["sports"] and (now - ACTIVE_SPORTS_CACHE["timestamp"]) < 600:
         return ACTIVE_SPORTS_CACHE["sports"]
-    if not ODDS_API_KEY:
+    if not get_api_key():
         return []
-    url = f"https://api.the-odds-api.com/v4/sports/?apiKey={ODDS_API_KEY}"
+    url = f"https://api.the-odds-api.com/v4/sports/?apiKey={get_api_key()}"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "EdgePulseEngine/1.0", "Accept": "application/json"})
         with urllib.request.urlopen(req, timeout=10) as resp:
@@ -400,7 +412,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
         }
 
     # 2. Check if API key is present; if not, gracefully load from disk cache
-    if not ODDS_API_KEY:
+    if not get_api_key():
         load_cached_odds(filter_key)
         return {
             "status": "success",
@@ -522,7 +534,7 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
     for l_key in target_leagues:
         url = (
             f"https://api.the-odds-api.com/v4/sports/{l_key}/odds/"
-            f"?apiKey={ODDS_API_KEY}&regions=us,us2,uk,eu,au&markets=h2h&oddsFormat=american"
+            f"?apiKey={get_api_key()}&regions=us,us2,uk,eu,au&markets=h2h&oddsFormat=american"
         )
         req = urllib.request.Request(
             url,
@@ -548,6 +560,27 @@ def run_single_sport_scan(sport_key: str, clear_old: bool = True, force: bool = 
                     combined_matches.extend(valid_matches)
                     api_calls_made += 1
                     leagues_used.append(l_key)
+        except urllib.error.HTTPError as he:
+            print(f"Notice: Live feed HTTP error for {l_key}: {he.code}")
+            if he.code in (401, 429):
+                print("Quota exceeded or unauthorized. Rotating API Key...")
+                rotate_api_key()
+                # Retry once with new key
+                url = url.split("?apiKey=")[0] + f"?apiKey={get_api_key()}&regions=us,us2,uk,eu,au&markets=h2h&oddsFormat=american"
+                req = urllib.request.Request(url, headers={"User-Agent": "EdgePulseEngine/1.0", "Accept": "application/json"})
+                try:
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        if resp.status == 200:
+                            quota_remaining = int(resp.headers.get("x-requests-remaining") or quota_remaining)
+                            quota_used = int(resp.headers.get("x-requests-used") or quota_used)
+                            league_data = json.loads(resp.read().decode("utf-8"))
+                            valid_matches = [m for m in league_data if is_match_active_or_upcoming(m.get("commence_time", ""), max_hours_past=12.0)]
+                            for vm in valid_matches: vm["sport_key"] = l_key
+                            combined_matches.extend(valid_matches)
+                            api_calls_made += 1
+                            leagues_used.append(l_key)
+                except Exception as retry_e:
+                    print(f"Retry failed for {l_key}: {retry_e}")
         except Exception as le:
             print(f"Notice: Live feed error for {l_key}: {le}")
 
