@@ -96,7 +96,10 @@
 <body class="min-h-screen flex flex-col selection:bg-neonCyan selection:text-black overflow-x-hidden w-full">
 <!-- TOP NAVBAR -->
 <header class="border-b border-brandBorder bg-brandDark/95 backdrop-blur sticky top-0 z-50 w-full">
-<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 min-w-0"><div class="flex items-center space-x-2 sm:space-x-4 shrink-0"><div class="relative shrink-0">
+<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 min-w-0"><div class="flex items-center space-x-2 sm:space-x-4 shrink-0"><div class="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0" onclick="onBrandLogoClick()" title="Go to Sports Hub">
+<div class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50 shrink-0" id="status-dot"></div>
+<span class="text-base sm:text-xl font-bold tracking-wider text-white group-hover:text-neonCyan transition">EDGE<span class="text-neonCyan">PULSE</span></span>
+</div><div class="relative shrink-0">
 <button class="flex items-center space-x-1 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-700 hover:border-neonCyan transition active:scale-95 shadow-sm shrink-0" id="btn-live-menu" onclick="toggleLiveMenu()" title="Sports &amp; Leagues">
 <svg class="w-4 h-4 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
 <path d="M4 6h16M4 12h16m-7 6h7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -386,10 +389,7 @@
 <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
 </svg>
 <span class="hidden sm:inline" id="nav-refresh-label">Refresh</span>
-</button><div class="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0" onclick="onBrandLogoClick()" title="Go to Sports Hub">
-<div class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50 shrink-0" id="status-dot"></div>
-<span class="text-base sm:text-xl font-bold tracking-wider text-white group-hover:text-neonCyan transition">EDGE<span class="text-neonCyan">PULSE</span></span>
-</div></div>
+</button></div>
 <!-- Brand & Stream Status -->
 <!-- Right Controls -->
 <div class="flex items-center space-x-1 sm:space-x-2.5 shrink-0">
@@ -437,13 +437,7 @@
 <!-- Engine Feed Status (Shown on desktop to keep mobile header clean) -->
 <!-- Live Sports Dropdown Menu -->
 <!-- Quick Refresh Button (Navbar, Desktop only) -->
-
-<button class="hidden items-center space-x-1 bg-brandCard hover:bg-slate-800 border border-brandBorder hover:border-neonCyan px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-mono text-neonCyan font-bold transition shadow-sm cursor-pointer shrink-0" id="nav-btn-hub" onclick="showSportsHomeView()" title="Choose another sport or league">
-<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-<span><span class="hidden sm:inline">Sports </span>Hub</span>
-</button></div>
+</div>
 </div>
 </header>
 <!-- TOAST NOTIFICATION -->
