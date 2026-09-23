@@ -2876,7 +2876,7 @@
     }
 
     function updateStakingSettings() {
-      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
+      const bankroll = (parseFloat(document.getElementById('drawer-input-bankroll')?.value) || (1000 * getRate())) / getRate();
       const kellyMult = parseFloat(document.getElementById('drawer-select-kelly').value) || 0.25;
       
       // Re-render immediately on client
@@ -3693,7 +3693,7 @@
       const name = document.getElementById('drawer-input-name')?.value.trim();
       const avatarUrl = document.getElementById('drawer-input-avatar-url')?.value.trim();
       const region = document.getElementById('drawer-select-region')?.value || 'all';
-      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
+      const bankroll = (parseFloat(document.getElementById('drawer-input-bankroll')?.value) || (1000 * getRate())) / getRate();
       const kellyMultiplier = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
       const minEv = parseFloat(document.getElementById('drawer-select-minev')?.value) || 0.05;
 
@@ -4332,7 +4332,7 @@
       } else if (typeof a.sharp_true_prob === 'number') {
         pTrue = a.sharp_true_prob;
       }
-      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
+      const bankroll = (parseFloat(document.getElementById('drawer-input-bankroll')?.value) || (1000 * getRate())) / getRate();
       const kellyMult = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
       const kelly = calcKelly(pTrue, softDec, bankroll, kellyMult);
 
@@ -4361,7 +4361,7 @@
     async function confirmLogBet() {
       if (!currentTrackingAnomaly || !currentUser) return;
       const btn = document.getElementById('btn-confirm-log-bet');
-      const stakeVal = (parseFloat(document.getElementById(\'modal-track-stake\')?.value) || (10.0 * getRate())) / getRate();
+      const stakeVal = (parseFloat(document.getElementById('modal-track-stake')?.value) || (10.0 * getRate())) / getRate();
       const notesVal = document.getElementById('modal-track-notes')?.value || '';
 
       const a = currentTrackingAnomaly;
@@ -5162,7 +5162,7 @@
         ? `Showing ${aStart + 1}–${aEnd} of ${anomalies.length} alerts${searchQuery ? ' (filtered)' : ''}`
         : '0 alerts';
 
-      const bankroll = (parseFloat(document.getElementById(\'drawer-input-bankroll\')?.value) || (1000 * getRate())) / getRate();
+      const bankroll = (parseFloat(document.getElementById('drawer-input-bankroll')?.value) || (1000 * getRate())) / getRate();
       const kellyMult = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
 
       const anomaliesContainer = document.getElementById('anomalies-container');
