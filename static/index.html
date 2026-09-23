@@ -1071,22 +1071,9 @@
           <button id="btn-mode-arb" onclick="switchDashboardMode('arb')" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition text-slate-400 hover:text-white cursor-pointer">Arb (<span id="arb-count-badge">0</span>)</button>
         </div>
 
-        <!-- Bankroll Input -->
-        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
-          <span class="text-slate-400 font-semibold text-[11px]">Roll:</span>
-          <span class="text-neonGreen font-bold currency-sym">$</span>
-          <input id="input-bankroll" type="number" min="10" step="50" value="1000" oninput="updateStakingSettings()" class="w-16 bg-transparent text-white font-bold focus:outline-none focus:text-neonGreen text-xs" />
-        </div>
 
-        <!-- Kelly Multiplier Selector -->
-        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
-          <span class="text-slate-400 font-semibold text-[11px]">Kelly:</span>
-          <select id="select-kelly" onchange="updateStakingSettings()" class="bg-transparent text-neonCyan font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-none truncate text-xs">
-            <option value="0.25" class="bg-brandDark text-white">0.25x (Quarter)</option>
-            <option value="0.5" class="bg-brandDark text-white">0.50x (Half)</option>
-            <option value="1.0" class="bg-brandDark text-white">1.00x (Full)</option>
-          </select>
-        </div>
+
+
 
         <!-- Min EV Threshold Filter -->
         <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0">
@@ -1099,8 +1086,8 @@
           </select>
         </div>
 
-        <!-- Bookmaker Geo-Region Filter -->
-                <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0" title="Display Currency">
+        <!-- Currency Filter -->
+        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0" title="Display Currency">
           <span class="text-slate-400 font-semibold text-[11px]">Cur:</span>
           <select id="select-currency" onchange="changeCurrency(this.value)" class="bg-transparent text-neonGreen font-bold focus:outline-none cursor-pointer text-xs">
             <option value="$" selected>USD ($)</option>
@@ -1113,9 +1100,9 @@
         </div>
 
         <!-- Bookmaker Geo-Region Filter -->
-        <div class="flex items-center space-x-1.5 bg-brandDark/90 border border-brandBorder rounded-xl px-2.5 py-1.5 shrink-0" title="Filter sportsbooks accessible in your country/region">
-          <span class="text-slate-400 font-semibold text-[11px]">Region:</span>
-          <select id="select-region" onchange="changeRegion(this.value)" class="bg-transparent text-neonGreen font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-none truncate text-xs">
+        <div class="flex items-center space-x-2 bg-brandDark/90 border-2 border-neonCyan shadow-[0_0_10px_rgba(0,255,255,0.2)] rounded-xl px-3 py-1.5 shrink-0 transition hover:scale-105" title="Filter sportsbooks accessible in your country/region">
+          <span class="text-white font-extrabold text-[12px] tracking-wide uppercase">Region:</span>
+          <select id="select-region" onchange="changeRegion(this.value)" class="bg-transparent text-neonCyan font-extrabold focus:outline-none cursor-pointer max-w-[120px] sm:max-w-none truncate text-sm">
             <option value="all" selected>All Books</option>
             <option value="in">India / Global</option>
             <option value="sea">SE Asia</option>
@@ -3000,8 +2987,8 @@
     }
 
     function updateStakingSettings() {
-      const bankroll = parseFloat(document.getElementById('input-bankroll').value) || 1000;
-      const kellyMult = parseFloat(document.getElementById('select-kelly').value) || 0.25;
+      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll').value) || 1000;
+      const kellyMult = parseFloat(document.getElementById('drawer-select-kelly').value) || 0.25;
       
       // Re-render immediately on client
       if (lastStateData) renderState(lastStateData);
@@ -3876,10 +3863,10 @@
           updateUserProfileDisplay();
 
           // Sync dashboard controls
-          const bankrollInput = document.getElementById('input-bankroll');
+          const bankrollInput = document.getElementById('drawer-input-bankroll');
           if (bankrollInput) bankrollInput.value = bankroll;
 
-          const kellySelect = document.getElementById('select-kelly');
+          const kellySelect = document.getElementById('drawer-select-kelly');
           if (kellySelect) kellySelect.value = kellyMultiplier;
 
           const regionSelect = document.getElementById('select-region');
@@ -4456,8 +4443,8 @@
       } else if (typeof a.sharp_true_prob === 'number') {
         pTrue = a.sharp_true_prob;
       }
-      const bankroll = parseFloat(document.getElementById('input-bankroll')?.value) || 1000;
-      const kellyMult = parseFloat(document.getElementById('select-kelly')?.value) || 0.25;
+      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll')?.value) || 1000;
+      const kellyMult = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
       const kelly = calcKelly(pTrue, softDec, bankroll, kellyMult);
 
       const fmtBadge = a.format_title ? ` [${a.format_title}]` : '';
@@ -5133,8 +5120,8 @@
 
         if (!settingsInitialized) {
           settingsInitialized = true;
-          const bankrollInput = document.getElementById('input-bankroll');
-          const kellySelect = document.getElementById('select-kelly');
+          const bankrollInput = document.getElementById('drawer-input-bankroll');
+          const kellySelect = document.getElementById('drawer-select-kelly');
 
           if (bankrollInput && document.activeElement !== bankrollInput) {
             bankrollInput.value = state.settings.bankroll || 1000;
@@ -5286,8 +5273,8 @@
         ? `Showing ${aStart + 1}–${aEnd} of ${anomalies.length} alerts${searchQuery ? ' (filtered)' : ''}`
         : '0 alerts';
 
-      const bankroll = parseFloat(document.getElementById('input-bankroll')?.value) || 1000;
-      const kellyMult = parseFloat(document.getElementById('select-kelly')?.value) || 0.25;
+      const bankroll = parseFloat(document.getElementById('drawer-input-bankroll')?.value) || 1000;
+      const kellyMult = parseFloat(document.getElementById('drawer-select-kelly')?.value) || 0.25;
 
       const anomaliesContainer = document.getElementById('anomalies-container');
       if (anomalies.length === 0) {
