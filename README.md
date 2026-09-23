@@ -110,7 +110,7 @@ python3 -m unittest discover tests
 python3 run.py --duration 10 --threshold 0.03 --ev 0.02
 ```
 
-### 3. Launch Web Terminal
+### 3. Launch Web Terminal (Local Development)
 ```bash
 python3 web_app.py
 ```
@@ -144,11 +144,14 @@ docker build -t edgepulse:latest .
 docker run -d -p 8080:8080 -v $(pwd)/data:/app/data --name edgepulse edgepulse:latest
 ```
 
-### Cloud Deployment (Azure App Service / Render / Railway)
-EdgePulse automatically detects dynamic platform port variables (`$PORT`) and requires zero build dependencies:
-1. Push repository to GitHub.
-2. Connect to your PaaS of choice (Render, Railway, or Azure App Service Linux).
-3. Set Start Command to `python3 web_app.py`.
+### Google Cloud Run (Production)
+EdgePulse includes a fully automated deployment script for Google Cloud Run. It utilizes the included `Dockerfile` for containerization and seamlessly pushes to GCP.
+
+```bash
+# Deploy instantly to Google Cloud Run
+./deploy.sh
+```
+*Note: Ensure you have the `gcloud` CLI installed and authenticated with your GCP project.*
 
 ---
 
