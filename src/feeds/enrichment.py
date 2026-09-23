@@ -3,7 +3,7 @@ import copy
 from typing import Dict, Any, List
 from src.math_engine import american_to_decimal, decimal_to_american
 
-ASIAN_BOOKMAKERS = [
+GLOBAL_BOOKMAKERS = [
     # India / General Asia
     {"key": "stake", "title": "Stake"},
     {"key": "parimatch", "title": "Parimatch"},
@@ -17,13 +17,27 @@ ASIAN_BOOKMAKERS = [
     {"key": "bk8", "title": "BK8"},
     {"key": "me88", "title": "Me88"},
     {"key": "12play", "title": "12Play"},
-    {"key": "sbobet", "title": "SBOBET"}
+    {"key": "sbobet", "title": "SBOBET"},
+    # Canada
+    {"key": "proline_plus", "title": "Proline+"},
+    {"key": "sportsinteraction", "title": "Sports Interaction"},
+    {"key": "thescore", "title": "theScore Bet"},
+    {"key": "bet99", "title": "Bet99"},
+    # Latin America
+    {"key": "betano", "title": "Betano"},
+    {"key": "caliente", "title": "Caliente"},
+    {"key": "codere", "title": "Codere"},
+    {"key": "bodog", "title": "Bodog"},
+    # Africa
+    {"key": "sportpesa", "title": "SportPesa"},
+    {"key": "hollywoodbets", "title": "Hollywoodbets"},
+    {"key": "bet9ja", "title": "Bet9ja"}
 ]
 
-def inject_asian_sportsbooks(match: Dict[str, Any]) -> None:
+def inject_global_sportsbooks(match: Dict[str, Any]) -> None:
     """
-    Enriches a match dictionary with synthetic quotes for popular Asian/Crypto
-    sportsbooks by deriving them from existing market consensus.
+    Enriches a match dictionary with synthetic quotes for popular global/regional
+    sportsbooks (Asia, LATAM, Canada, Africa) by deriving them from existing market consensus.
     """
     existing_books = match.get("bookmakers", [])
     if not existing_books:
@@ -41,7 +55,7 @@ def inject_asian_sportsbooks(match: Dict[str, Any]) -> None:
         return
         
     # Inject our new books
-    for new_book in ASIAN_BOOKMAKERS:
+    for new_book in GLOBAL_BOOKMAKERS:
         # 20% chance this book doesn't offer this match, to make it realistic
         if random.random() < 0.2:
             continue
