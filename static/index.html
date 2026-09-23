@@ -1105,6 +1105,7 @@
           <select id="select-region" onchange="changeRegion(this.value)" class="bg-transparent text-neonGreen font-bold focus:outline-none cursor-pointer max-w-[110px] sm:max-w-none truncate text-xs">
             <option value="all" selected>All Books</option>
             <option value="in">India / Global</option>
+            <option value="sea">SE Asia</option>
             <option value="us">United States</option>
             <option value="uk">UK & Ireland</option>
             <option value="eu">Europe</option>
@@ -3347,9 +3348,22 @@
     }
 
     const BOOK_REGIONS = {
+      // SE Asia & Crypto
+      'stake': ['in', 'sea', 'global'],
+      'parimatch': ['in', 'sea', 'global'],
+      'dafabet': ['in', 'sea', 'global'],
+      '10cric': ['in', 'global'],
+      'melbet': ['in', 'sea', 'global'],
+      'polymarket': ['in', 'sea', 'global', 'us'],
+      'sg_pools': ['sea'],
+      'bk8': ['sea'],
+      'me88': ['sea'],
+      '12play': ['sea'],
+      'sbobet': ['sea', 'global'],
+
       // India & Global / Offshore Accessible Books
-      '1xbet': ['in', 'global'],
-      'onexbet': ['in', 'global'],
+      '1xbet': ['in', 'sea', 'global'],
+      'onexbet': ['in', 'sea', 'global'],
       'bet365': ['in', 'uk', 'global'],
       'bet365_au': ['au'],
       'betonlineag': ['in', 'us2', 'global'],

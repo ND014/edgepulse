@@ -72,24 +72,18 @@ gcloud builds submit \
   --service-account="projects/${PROJECT_ID}/serviceAccounts/${BUILDER_SA}" .
 
 # 5. Deploy container to Cloud Run with dedicated service account for storage access
-echo "[5/5] Deploying container to Cloud Run in multiple regions..."
-
-REGIONS=("asia-south1" "asia-southeast1")
-
-for DEPLOY_REGION in "${REGIONS[@]}"; do
-  echo ">>> Deploying to ${DEPLOY_REGION}..."
-  gcloud run deploy edgepulse \
-    --image="${FULL_IMAGE}" \
-    --service-account="${BUILDER_SA}" \
-    --region="${DEPLOY_REGION}" \
-    --project="${PROJECT_ID}" \
-    --platform=managed \
-    --allow-unauthenticated \
-    --memory=512Mi \
-    --cpu=1 \
-    --timeout=300 \
-    --concurrency=80
-done
+echo "[5/5] Deploying container to Cloud Run..."
+gcloud run deploy edgepulse \
+  --image="${FULL_IMAGE}" \
+  --service-account="${BUILDER_SA}" \
+  --region="${REGION}" \
+  --project="${PROJECT_ID}" \
+  --platform=managed \
+  --allow-unauthenticated \
+  --memory=512Mi \
+  --cpu=1 \
+  --timeout=300 \
+  --concurrency=80
 
 echo "=================================================="
 echo "  Deployment completed successfully!"
