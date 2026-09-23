@@ -1213,11 +1213,11 @@
           </div>
         </div>
         <button id="guide-toggle-btn" class="px-2.5 py-1 rounded-lg bg-brandDark border border-brandBorder text-xs text-neonCyan font-mono font-semibold hover:bg-slate-800 transition">
-          Hide Guide ✕
+          Show Guide
         </button>
       </div>
 
-      <div id="guide-steps-content" class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3.5 border-t border-brandBorder/60 text-xs font-mono">
+      <div id="guide-steps-content" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3.5 border-t border-brandBorder/60 text-xs font-mono">
         <div class="bg-brandDark/80 border border-brandBorder/70 rounded-xl p-3 flex flex-col justify-between space-y-2">
           <div>
             <div class="flex items-center space-x-2 text-neonCyan font-bold mb-1">
@@ -3916,7 +3916,7 @@
       const isHidden = content.classList.contains('hidden');
       if (isHidden) {
         content.classList.remove('hidden');
-        btn.innerText = 'Hide Guide ✕';
+        btn.innerText = 'Show Guide';
         localStorage.setItem('hide_beginner_guide', '0');
       } else {
         content.classList.add('hidden');
