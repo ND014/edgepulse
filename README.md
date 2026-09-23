@@ -1,6 +1,6 @@
 # EdgePulse | Quantitative Sports Odds Anomaly & Arbitrage Engine
 
-**Live Web Application:** [https://edgepulse.app](https://edgepulse.app)
+**Live Web Application:** [https://edgepulse-508845137062.asia-south1.run.app](https://edgepulse-508845137062.asia-south1.run.app)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=flat-square&logo=python)](https://www.python.org/)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20(Stdlib%20Only)-success.svg?style=flat-square)]()
