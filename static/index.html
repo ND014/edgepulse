@@ -31,6 +31,27 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+
+    window.currencySym = localStorage.getItem('user_currency') || '$';
+
+    function changeCurrency(val) {
+      window.currencySym = val;
+      localStorage.setItem('user_currency', val);
+      document.querySelectorAll('.currency-sym').forEach(el => el.innerText = val);
+      if (typeof renderState === 'function' && typeof lastStateData !== 'undefined' && lastStateData) {
+        renderState(lastStateData);
+      }
+      if (typeof loadUserBets === 'function' && currentUser) {
+        loadUserBets();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const sel = document.getElementById('select-currency');
+      if (sel) sel.value = window.currencySym;
+      document.querySelectorAll('.currency-sym').forEach(el => el.innerText = window.currencySym);
+    });
+
     tailwind.config = {
       darkMode: 'class',
       theme: {
@@ -4866,7 +4887,7 @@
         const strokeWidth = isZero ? '1.5' : '1';
         const dashArray = isZero ? '4 4' : '2 2';
         const textColor = isZero ? '#CBD5E1' : '#94A3B8';
-        const formatted = (val > 0 ? '+' : '') + '$' + val.toFixed(2);
+        const formatted = (val > 0 ? '+' : '') + window.currencySym + val.toFixed(2);
         return `
           <line x1="${padLeft}" y1="${y}" x2="${W - padRight}" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${dashArray}" />
           <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" fill="${textColor}" font-size="11" font-family="monospace" font-weight="${isZero ? 'bold' : 'normal'}">${formatted}</text>
