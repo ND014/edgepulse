@@ -19,6 +19,10 @@ Designed with **zero external pip dependencies** — powered entirely by the Pyt
 - **Automated Dutching Arbitrage Engine**: Solves optimal proportional capital allocation across multiple books to lock in guaranteed risk-free profit margins.
 - **Fractional Kelly Criterion Staking**: Mathematically sizes positions to maximize log-wealth growth while minimizing bankroll drawdown risk.
 - **Institutional Web Terminal**: Bloomberg/HFT-inspired dashboard featuring interactive SVG anomaly charts, real-time orderbooks, league hubs, and paper-trading portfolio analytics.
+- **True Global Currency Engine**: Real-time cross-currency exchange rate multiplication engine, isolating USD backend persistence while seamlessly localizing the UI to INR, EUR, GBP, AUD, and more.
+- **Smart API Key Rotation**: Bypasses strict vendor rate limits by seamlessly parsing and rotating through a comma-separated cluster of API keys upon HTTP 429 Quota Exceeded responses.
+- **Global Bookmaker Expansion**: Deep enrichment engine categorizing and scanning over 90+ sportsbooks across US, UK, EU, AU, Canada, LATAM, and Africa.
+- **Unified Master Hubs**: Aggregates disparate sports leagues (e.g., MLB, KBO, NPB) into single-click "All Active" master dashboards for instantaneous global market scanning.
 - **Zero External Dependencies**: Zero `pip install` required. Built using Python's native `http.server`, `threading`, `sqlite3`, `json`, and `urllib`.
 - **Automated Webhook Dispatch**: Configurable real-time notifications to Discord and Telegram for detected anomalies exceeding custom edge thresholds.
 - **30/30 Automated Unit Tests**: Comprehensive test suite covering odds conversions, devigging mathematics, Dutching arbitrage models, entity resolution, and HTTP API endpoints.
